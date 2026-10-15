@@ -104,6 +104,11 @@ export const ImageCard = React.memo(function ImageCard({
         aria-label={`Select ${image.name || shortenUrl(image.url)}`}
         className="relative block aspect-square w-full cursor-pointer overflow-hidden bg-background"
       >
+        {/* Transparency-aware preview background so PNG/SVG tiles read clearly. */}
+        <span
+          className="checkerboard pointer-events-none absolute inset-0 text-foreground/[0.07]"
+          aria-hidden
+        />
         {stage === "failed" ? (
           <span className="flex h-full w-full flex-col items-center justify-center gap-2 text-[11px] uppercase tracking-[0.12em] opacity-60">
             <ImageOff className="size-5" />

@@ -233,6 +233,8 @@ export const DOC_SECTIONS: DocSection[] = [
           ["R2_ENDPOINT", "No", "Override the S3 endpoint (MinIO or other S3-compatible stores)."],
           ["R2_ZIP_TTL_SECONDS", "No", "Archive lifetime in seconds (default 3600)."],
           ["FETCH_USER_AGENT", "No", "Override the outbound user agent."],
+          ["NEXT_PUBLIC_ADSENSE_CLIENT", "No", "AdSense publisher id; unset renders placeholders."],
+          ["NEXT_PUBLIC_ADSENSE_SLOT", "No", "Default AdSense ad-unit slot id."],
         ],
       },
       {

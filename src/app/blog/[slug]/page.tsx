@@ -4,9 +4,11 @@ import { notFound } from "next/navigation";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 
 import { ContentBlocks } from "@/components/content-blocks";
+import { JsonLd } from "@/components/json-ld";
 import { PageHero } from "@/components/page-hero";
 import { Button } from "@/components/ui/button";
 import { BLOG_POSTS, formatPostDate, getPost } from "@/lib/content/blog";
+import { blogPostingLd, breadcrumbLd } from "@/lib/structured-data";
 
 interface PostPageProps {
   params: Promise<{ slug: string }>;
@@ -45,6 +47,16 @@ export default async function BlogPostPage({ params }: PostPageProps) {
 
   return (
     <>
+      <JsonLd
+        data={[
+          blogPostingLd(post),
+          breadcrumbLd([
+            { name: "Home", path: "/" },
+            { name: "Blog", path: "/blog" },
+            { name: post.title, path: `/blog/${post.slug}` },
+          ]),
+        ]}
+      />
       <PageHero
         eyebrow={`${post.tag} · ${formatPostDate(post.date)} · ${post.readingMinutes} min read`}
         title={post.title}

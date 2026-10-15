@@ -1,23 +1,31 @@
 import Link from "next/link";
 import {
   ArrowRight,
+  Check,
   Code2,
   Filter,
   Gauge,
   Layers,
   Link2,
+  Minus,
   Package,
   ShieldCheck,
   Sparkles,
   Wand2,
+  X,
 } from "lucide-react";
 
+import { AccordionFaq } from "@/components/accordion-faq";
+import { AdSlot } from "@/components/ad-slot";
 import { Extractor } from "@/components/extractor/extractor";
+import { JsonLd } from "@/components/json-ld";
+import { StatsRow } from "@/components/stats-row";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { BLOG_POSTS, formatPostDate } from "@/lib/content/blog";
-import { FEATURES, HOME_FAQ, SITE } from "@/lib/site";
+import { FEATURES, SITE, TIPS } from "@/lib/site";
 import { getStorageMode } from "@/lib/storage-mode";
+import { homeStructuredData } from "@/lib/structured-data";
 
 const STEPS = [
   {
@@ -56,20 +64,30 @@ const AUDIENCES = [
   },
 ] as const;
 
-const COMPARISON = [
-  ["Free forever", "Requires a paid API"],
-  ["HTML code input", "Rarely supported"],
-  ["Advanced filters", "Limited"],
-  ["No signup required", "Account required"],
-  ["Privacy guaranteed", "Data retention unclear"],
-  ["Installable PWA", "Not offered"],
-] as const;
+type Verdict = "yes" | "no" | "partial";
+
+const COMPARISON: { feature: string; theirs: Verdict; note?: string }[] = [
+  { feature: "Free forever", theirs: "no", note: "Requires a paid API" },
+  { feature: "HTML code input", theirs: "no" },
+  { feature: "Bulk URL scanning", theirs: "no" },
+  { feature: "Advanced filters", theirs: "partial", note: "Limited" },
+  { feature: "No signup required", theirs: "no", note: "Account required" },
+  { feature: "Privacy guaranteed", theirs: "partial", note: "Data retention unclear" },
+  { feature: "Batch download as ZIP", theirs: "partial", note: "Often paywalled" },
+];
+
+function VerdictIcon({ verdict }: { verdict: Verdict }) {
+  if (verdict === "yes") return <Check className="size-4" strokeWidth={3} />;
+  if (verdict === "partial") return <Minus className="size-4 opacity-70" />;
+  return <X className="size-4 opacity-70" />;
+}
 
 export default function HomePage() {
   const storage = getStorageMode();
 
   return (
     <>
+      <JsonLd data={homeStructuredData()} />
       {/* HERO */}
       <section className="relative overflow-hidden border-b border-border">
         <div className="grid-paper pointer-events-none absolute inset-0" aria-hidden />
@@ -91,21 +109,31 @@ export default function HomePage() {
             <Extractor storage={storage} />
           </div>
 
-          <dl className="mt-10 grid grid-cols-2 gap-px overflow-hidden rounded-lg border border-border bg-border sm:grid-cols-4">
-            {[
-              { label: "Signup required", value: "None" },
-              { label: "Cost", value: "Free" },
-              { label: "Formats detected", value: "11" },
-              { label: "Client-side preview", value: "Yes" },
-            ].map((stat) => (
-              <div key={stat.label} className="bg-background p-4 text-center">
-                <dt className="text-[10px] font-semibold uppercase tracking-[0.16em] opacity-60">
-                  {stat.label}
-                </dt>
-                <dd className="mt-1 text-xl font-bold tracking-tight">{stat.value}</dd>
-              </div>
-            ))}
-          </dl>
+          <StatsRow className="mt-4 max-w-[960px] sm:mx-auto" />
+
+          <div className="mt-4 max-w-[960px] rounded-lg border border-border bg-card p-5 sm:mx-auto sm:p-6">
+            <p className="mb-4 text-[10px] font-semibold uppercase tracking-[0.18em] opacity-60">
+              Tips
+            </p>
+            <ul className="grid list-none gap-3.5 p-0 sm:grid-cols-2 lg:grid-cols-5">
+              {TIPS.map((tip) => (
+                <li
+                  key={tip}
+                  className="relative border-t border-border pt-3 text-[13px] leading-relaxed opacity-75"
+                >
+                  <span
+                    className="absolute -top-px left-0 h-[2px] w-[22px] bg-foreground"
+                    aria-hidden
+                  />
+                  {tip}
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="mt-6 max-w-[728px] sm:mx-auto">
+            <AdSlot size="leaderboard" />
+          </div>
         </div>
       </section>
 
@@ -236,15 +264,24 @@ export default function HomePage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {COMPARISON.map(([feature, theirs]) => (
-                    <tr key={feature} className="border-b border-border last:border-0">
-                      <td className="px-4 py-3 font-medium">{feature}</td>
+                  {COMPARISON.map((row) => (
+                    <tr key={row.feature} className="border-b border-border last:border-0">
+                      <td className="px-4 py-3 font-medium">{row.feature}</td>
                       <td className="px-4 py-3">
-                        <span className="inline-flex size-4 items-center justify-center rounded-full bg-primary text-[10px] text-primary-foreground">
-                          ✓
+                        <span className="flex size-5 items-center justify-center rounded-full bg-primary text-primary-foreground">
+                          <Check className="size-3" strokeWidth={3} />
                         </span>
                       </td>
-                      <td className="px-4 py-3 opacity-60">{theirs}</td>
+                      <td className="px-4 py-3">
+                        <span className="flex flex-col items-center gap-1">
+                          <VerdictIcon verdict={row.theirs} />
+                          {row.note ? (
+                            <span className="text-[10px] uppercase tracking-[0.08em] opacity-60">
+                              ({row.note})
+                            </span>
+                          ) : null}
+                        </span>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -317,24 +354,7 @@ export default function HomePage() {
             Frequently asked questions
           </h2>
 
-          <div className="mt-10 divide-y divide-border overflow-hidden rounded-lg border border-border">
-            {HOME_FAQ.map((item, index) => (
-              <details key={item.question} className="group bg-background">
-                <summary className="flex cursor-pointer list-none items-center gap-4 p-5 hover:bg-primary hover:text-primary-foreground">
-                  <span className="text-xs font-bold tabular-nums opacity-50">
-                    {String(index + 1).padStart(2, "0")}
-                  </span>
-                  <span className="flex-1 text-sm font-semibold sm:text-base">{item.question}</span>
-                  <span className="text-lg leading-none transition-transform group-open:rotate-45">
-                    +
-                  </span>
-                </summary>
-                <p className="px-5 pb-5 pl-[3.25rem] text-sm leading-relaxed opacity-80">
-                  {item.answer}
-                </p>
-              </details>
-            ))}
-          </div>
+          <AccordionFaq />
 
           <p className="mt-6 text-sm opacity-70">
             Still stuck?{" "}
@@ -386,6 +406,12 @@ export default function HomePage() {
               </Link>
             ))}
           </div>
+        </div>
+      </section>
+
+      <section className="border-b border-border">
+        <div className="mx-auto w-full max-w-[728px] px-4 py-10 sm:px-6">
+          <AdSlot size="leaderboard" />
         </div>
       </section>
 

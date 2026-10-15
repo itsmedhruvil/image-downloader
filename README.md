@@ -28,6 +28,14 @@ ZIP archive storage, and installable as a **PWA**.
   leaves the device; archives expire automatically.
 - **PWA** — web manifest, installable, service worker with an offline shell and a
   stale-while-revalidate image cache.
+- **Monetisation-ready ad slots** — dashboard ad placeholders by default; set
+  `NEXT_PUBLIC_ADSENSE_CLIENT`/`NEXT_PUBLIC_ADSENSE_SLOT` to swap in real AdSense units that load
+  after idle.
+- **SEO built in** — JSON-LD for WebApplication, SoftwareApplication, FAQPage, HowTo, Organization,
+  WebSite/SearchAction, BlogPosting and BreadcrumbList, plus a generated `sitemap.xml`, `robots.txt`
+  and an RSS 2.0 feed at `/rss.xml`.
+- **Local-only activity stats** — "URLs extracted / Images extracted" counters live in
+  `localStorage`, sync across tabs, and are never sent anywhere.
 - **Mobile-first, responsive, accessible** — keyboard navigable, focus-visible rings, skip link.
 
 ## Tech stack (all free tiers)
@@ -86,6 +94,8 @@ directly. Its free tier includes 10 GB of storage and generous Class A/B operati
 | `R2_ZIP_TTL_SECONDS` | No | Archive lifetime in seconds (default `3600`) |
 | `R2_PUBLIC_URL` | No | Reserved for a public bucket base URL (not required) |
 | `FETCH_USER_AGENT` | No | Override the outbound user agent |
+| `NEXT_PUBLIC_ADSENSE_CLIENT` | No | AdSense publisher id; unset renders monochrome ad placeholders |
+| `NEXT_PUBLIC_ADSENSE_SLOT` | No | Default AdSense ad-unit slot id |
 
 The `/status` page reports which backend is active.
 
@@ -96,7 +106,8 @@ src/
   app/
     page.tsx                     # hero + extractor + marketing sections + FAQ
     pricing/ blog/ documentation/ changelog/ feature-request/ contact/ status/
-    privacy/ terms/ disclaimer/  # legal pages
+    privacy/ terms/ disclaimer/ imprint/ report-issue/  # legal & support pages
+    rss.xml/route.ts             # RSS 2.0 feed
     api/
       extract/route.ts           # scan a URL, a batch of URLs, or pasted markup
       proxy/route.ts             # stream images (hotlink-safe) + ?meta=1 size probe
@@ -107,8 +118,14 @@ src/
     sitemap.ts robots.ts
   components/
     extractor/                   # extractor, image card, filter bar, selection bar
+    accordion-faq.tsx            # rich FAQ (Radix accordion + content blocks)
+    ad-slot.tsx                  # AdSense unit or monochrome placeholder
+    stats-row.tsx                # local-only activity counters + Product Hunt badge
+    json-ld.tsx                  # structured-data emitter
     ui/                          # monochrome shadcn-style primitives
   lib/
+    structured-data.ts           # JSON-LD builders (WebApplication, FAQPage, HowTo, ...)
+    activity-stats.ts            # localStorage counters with cross-tab sync
     extract.core.ts              # shared, DOM-free extraction helpers
     extract.server.ts            # cheerio collector
     extract.client.ts            # DOMParser collector
@@ -157,10 +174,26 @@ npm run test:ui       # React extractor flow in jsdom (gallery, filters, selecti
 | Suite | Covers |
 | --- | --- |
 | `extract` | Format detection, srcset/CSS parsing, entity decoding, false-positive filters, both collectors, filename generation, ZIP packaging and failure handling |
+| `content` | JSON-LD schema shapes, FAQ → FAQPage generation, blog post schema, RSS well-formedness, activity-stat store semantics and persistence |
 | `r2` | `isR2Configured`, key generation, TTL parsing, PUT/GET/DELETE against an S3-compatible mock, bucket scoping |
-| `ui` | Tab switching, HTML-mode extraction, gallery rendering, format filters, select-all, ZIP request payload, selection reset, preview dialog, clipboard copy, theme bootstrap and theme menu |
+| `ui` | Tab switching, HTML-mode extraction, gallery rendering, format filters, select-all, ZIP request payload, selection reset, preview dialog, clipboard copy, ad-slot placeholder, FAQ accordion, stats row, theme bootstrap and theme menu |
 
 `npm run typecheck` checks the app; `npm run typecheck:tests` checks the test sources.
+
+### Manual end-to-end R2 check
+
+The R2 archive flow can be exercised against a running server using the bundled S3 mock:
+
+```bash
+npx tsx tests/s3-mock-server.mts          # terminal 1 — in-memory S3 on :9999
+
+R2_ACCOUNT_ID=test R2_ACCESS_KEY_ID=test R2_SECRET_ACCESS_KEY=test \
+R2_BUCKET=test-bucket R2_ENDPOINT=http://127.0.0.1:9999 npm start   # terminal 2
+
+curl -X POST localhost:3000/api/zip -H 'content-type: application/json' \
+  -d '{"images":[{"url":"https://example.com/a.png"}]}'
+# → {"downloadUrl":"/api/download/zips/…","stored":true,…}
+```
 
 ## Regenerating the icons
 

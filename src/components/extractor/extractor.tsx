@@ -21,6 +21,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { extractImagesFromMarkupClient, extractTitleClient } from "@/lib/extract.client";
+import { recordArchive, recordExtraction } from "@/lib/activity-stats";
 import { FORMAT_LABELS, SOURCE_LABELS } from "@/lib/extract.core";
 import {
   buildClientZip,
@@ -164,6 +165,7 @@ export function Extractor({ storage }: ExtractorProps) {
         } else {
           toast(`${found.length} ${pluralize(found.length, "image")} found.`);
         }
+        recordExtraction({ urls: 1, images: found.length });
         void measureSizes(found);
         return;
       }
@@ -200,6 +202,7 @@ export function Extractor({ storage }: ExtractorProps) {
         toast(`${data.images.length} ${pluralize(data.images.length, "image")} found.`);
       }
 
+      recordExtraction({ urls: data.pagesScanned, images: data.images.length });
       void measureSizes(data.images);
     } catch {
       setError("Something went wrong while extracting. Please try again.");
@@ -281,6 +284,7 @@ export function Extractor({ storage }: ExtractorProps) {
           return;
         }
         downloadBlob(result.blob, result.filename);
+        recordArchive();
         toast.success(
           `ZIP ready — ${result.included} ${pluralize(result.included, "image")} converted in your browser.`,
         );
@@ -306,6 +310,7 @@ export function Extractor({ storage }: ExtractorProps) {
       if (contentType.includes("application/json")) {
         const data = (await response.json()) as ZipResponse;
         triggerDownload(data.downloadUrl, data.filename);
+        recordArchive();
         toast.success(
           `ZIP ready — ${formatBytes(data.size)}${data.stored ? ", stored in R2" : ""}.`,
         );
@@ -318,6 +323,7 @@ export function Extractor({ storage }: ExtractorProps) {
       const blob = await response.blob();
       const skipped = Number(response.headers.get("x-archive-skipped") ?? "0");
       downloadBlob(blob, `website-images-${Date.now()}.zip`);
+      recordArchive();
       toast.success(`ZIP ready — ${formatBytes(blob.size)}.`);
       if (skipped > 0) {
         toast.warning(`${skipped} ${pluralize(skipped, "image")} could not be fetched.`);
@@ -358,6 +364,9 @@ export function Extractor({ storage }: ExtractorProps) {
             </TabsTrigger>
             <TabsTrigger value="bulk">
               <Layers className="size-3.5" /> Bulk URLs
+              <span className="ml-1 rounded-sm bg-foreground px-1 py-px text-[8.5px] font-bold uppercase tracking-[0.08em] text-background">
+                New
+              </span>
             </TabsTrigger>
           </TabsList>
 
@@ -590,12 +599,16 @@ export function Extractor({ storage }: ExtractorProps) {
                 </DialogDescription>
               </DialogHeader>
 
-              <div className="flex max-h-[55vh] items-center justify-center overflow-hidden rounded-md border border-border bg-background p-2">
+              <div className="relative flex max-h-[55vh] items-center justify-center overflow-hidden rounded-md border border-border bg-background p-2">
+                <span
+                  className="checkerboard checkerboard-lg pointer-events-none absolute inset-0 text-foreground/[0.07]"
+                  aria-hidden
+                />
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={preview.url.startsWith("data:") ? preview.url : proxiedUrl(preview.url)}
                   alt={preview.name || "Extracted image preview"}
-                  className="max-h-[52vh] w-auto max-w-full object-contain"
+                  className="relative max-h-[52vh] w-auto max-w-full object-contain"
                 />
               </div>
 

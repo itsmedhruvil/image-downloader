@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
+import { AdSlot } from "@/components/ad-slot";
 import { PageHero } from "@/components/page-hero";
 import { BLOG_POSTS, formatPostDate } from "@/lib/content/blog";
 
@@ -63,6 +64,11 @@ export default function BlogIndexPage() {
               </Link>
             ))}
           </div>
+        </div>
+      </section>
+      <section className="border-b border-border">
+        <div className="mx-auto w-full max-w-[728px] px-4 py-10 sm:px-6">
+          <AdSlot size="leaderboard" />
         </div>
       </section>
     </>

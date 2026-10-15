@@ -202,6 +202,10 @@ const { render, screen, fireEvent, waitFor, cleanup } = await import("@testing-l
 const { Extractor } = await import("../src/components/extractor/extractor");
 const { ThemeToggle, THEME_INIT_SCRIPT } = await import("../src/components/theme-toggle");
 const { TooltipProvider } = await import("../src/components/ui/tooltip");
+const { AdSlot } = await import("../src/components/ad-slot");
+const { AccordionFaq } = await import("../src/components/accordion-faq");
+const { StatsRow } = await import("../src/components/stats-row");
+const { recordExtraction, resetStats } = await import("../src/lib/activity-stats");
 
 /** Mirrors the provider composition from the root layout. */
 function withProviders(node: React.ReactElement) {
@@ -276,7 +280,7 @@ await test("select all then ZIP posts exactly the selected images", async () => 
   fireEvent.click(screen.getByRole("button", { name: /select all/i }));
   await waitFor(() => assert.ok(screen.getByText("4 selected")));
 
-  fireEvent.click(screen.getByRole("button", { name: /download as zip/i }));
+  fireEvent.click(screen.getByRole("button", { name: /as zip/i }));
 
   await waitFor(() => {
     const call = fetchCalls.find((entry) => entry.url.includes("/api/zip"));
@@ -381,6 +385,63 @@ await test("theme toggle exposes light, dark and system choices", async () => {
   assert.ok(screen.getByText("Light"));
   assert.ok(screen.getByText("System"));
   cleanup();
+});
+
+console.log("\nNew UI surfaces");
+
+await test("bulk tab carries the New badge", async () => {
+  render(withProviders(React.createElement(Extractor, { storage: "stream" })));
+  const tab = screen.getByRole("tab", { name: /bulk urls/i });
+  assert.ok(tab.textContent?.includes("New"), "bulk tab should be badged as new");
+  cleanup();
+});
+
+await test("image tiles render the transparency preview background", async () => {
+  await renderExtractor();
+  const tiles = win.document.querySelectorAll(".checkerboard");
+  assert.ok(tiles.length >= 4, `expected a checkerboard per tile, found ${tiles.length}`);
+  cleanup();
+});
+
+await test("ZIP button reports how many images are selected", async () => {
+  await renderExtractor();
+  assertText("Download 0 images as ZIP");
+  fireEvent.click(screen.getByRole("button", { name: /select all/i }));
+  await waitFor(() => assertText("Download 4 images as ZIP"));
+  cleanup();
+});
+
+await test("ad slot renders a reserved placeholder when AdSense is unconfigured", () => {
+  render(React.createElement(AdSlot, { size: "leaderboard" }));
+  assert.ok(screen.getByLabelText(/advertisement placeholder/i));
+  assertText("Ad Space · 728 × 90");
+  cleanup();
+});
+
+await test("FAQ accordion reveals rich answers on demand", async () => {
+  render(React.createElement(AccordionFaq, { limit: 2 }));
+  const first = screen.getByRole("button", {
+    name: /is this website image extractor free to use/i,
+  });
+  assert.equal(first.getAttribute("aria-expanded"), "false");
+
+  fireEvent.click(first);
+  await waitFor(() => assert.ok(screen.getByText("No signup required")));
+  assertText("No premium tiers for basic features");
+  cleanup();
+});
+
+await test("stats row reflects locally recorded activity", async () => {
+  resetStats();
+  recordExtraction({ urls: 3, images: 42 });
+  render(React.createElement(StatsRow));
+
+  await waitFor(() => assertText("42"));
+  assertText("URLs extracted");
+  assertText("Images extracted");
+  assertText("Product Hunt");
+  cleanup();
+  resetStats();
 });
 
 console.log(

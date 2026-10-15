@@ -2,10 +2,11 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight, Check, Minus } from "lucide-react";
 
+import { AccordionFaq } from "@/components/accordion-faq";
 import { PageHero } from "@/components/page-hero";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { HOME_FAQ, SITE } from "@/lib/site";
+import { SITE } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "Pricing",
@@ -180,24 +181,7 @@ export default function PricingPage() {
       <section>
         <div className="mx-auto w-full max-w-3xl px-4 py-14 sm:px-6 lg:py-20">
           <h2 className="text-2xl font-bold tracking-tight sm:text-3xl">Common questions</h2>
-          <div className="mt-8 divide-y divide-border overflow-hidden rounded-lg border border-border">
-            {HOME_FAQ.slice(0, 5).map((item, index) => (
-              <details key={item.question} className="group bg-background">
-                <summary className="flex cursor-pointer list-none items-center gap-4 p-5 hover:bg-primary hover:text-primary-foreground">
-                  <span className="text-xs font-bold tabular-nums opacity-50">
-                    {String(index + 1).padStart(2, "0")}
-                  </span>
-                  <span className="flex-1 text-sm font-semibold">{item.question}</span>
-                  <span className="text-lg leading-none transition-transform group-open:rotate-45">
-                    +
-                  </span>
-                </summary>
-                <p className="px-5 pb-5 pl-[3.25rem] text-sm leading-relaxed opacity-80">
-                  {item.answer}
-                </p>
-              </details>
-            ))}
-          </div>
+          <AccordionFaq limit={5} />
           <p className="mt-8 text-xs uppercase tracking-[0.14em] opacity-50">
             {SITE.name} · no hidden fees · no premium tiers
           </p>

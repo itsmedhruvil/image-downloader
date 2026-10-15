@@ -10,8 +10,9 @@
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
     "typecheck:tests": "tsc --noEmit -p tests/tsconfig.json",
-    "test": "tsx --tsconfig tests/tsconfig.json tests/extract.test.mts && tsx --tsconfig tests/tsconfig.json tests/r2.test.mts && tsx --tsconfig tests/tsconfig.json tests/ui.test.mts",
+    "test": "tsx --tsconfig tests/tsconfig.json tests/extract.test.mts && tsx --tsconfig tests/tsconfig.json tests/content.test.mts && tsx --tsconfig tests/tsconfig.json tests/r2.test.mts && tsx --tsconfig tests/tsconfig.json tests/ui.test.mts",
     "test:extract": "tsx --tsconfig tests/tsconfig.json tests/extract.test.mts",
+    "test:content": "tsx --tsconfig tests/tsconfig.json tests/content.test.mts",
     "test:r2": "tsx --tsconfig tests/tsconfig.json tests/r2.test.mts",
     "test:ui": "tsx --tsconfig tests/tsconfig.json tests/ui.test.mts",
     "icons": "python3 scripts/generate_icons.py"
@@ -21,6 +22,7 @@
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1152.0",
+    "@radix-ui/react-accordion": "^1.3.1",
     "@radix-ui/react-checkbox": "^1.4.1",
     "@radix-ui/react-dialog": "^1.3.1",
     "@radix-ui/react-dropdown-menu": "^2.2.1",

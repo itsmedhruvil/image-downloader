@@ -9,7 +9,9 @@ import { PwaRegistrar } from "@/components/pwa-registrar";
 import { THEME_INIT_SCRIPT } from "@/components/theme-toggle";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { JsonLd } from "@/components/json-ld";
 import { SITE } from "@/lib/site";
+import { organizationLd, webSiteLd } from "@/lib/structured-data";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -36,7 +38,10 @@ export const metadata: Metadata = {
   ],
   authors: [{ name: SITE.name, url: SITE.url }],
   manifest: "/manifest.webmanifest",
-  alternates: { canonical: "/" },
+  alternates: {
+    canonical: "/",
+    types: { "application/rss+xml": `${SITE.url}/rss.xml` },
+  },
   openGraph: {
     type: "website",
     url: SITE.url,
@@ -85,6 +90,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
       </head>
       <body className="min-h-dvh antialiased">
+        <JsonLd data={[organizationLd(), webSiteLd()]} />
         <TooltipProvider delayDuration={200}>
           <a
             href="#scraper"

@@ -15,6 +15,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/changelog",
     "/feature-request",
     "/contact",
+    "/report-issue",
+    "/imprint",
     "/status",
     "/privacy",
     "/terms",

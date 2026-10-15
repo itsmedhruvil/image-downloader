@@ -99,6 +99,8 @@
   --font-mono: ui-monospace, "SFMono-Regular", "Roboto Mono", monospace;
 
   --animate-fade-up: fade-up 0.35s ease-out both;
+  --animate-accordion-down: accordion-down 0.2s ease-out;
+  --animate-accordion-up: accordion-up 0.2s ease-out;
 }
 
 @layer base {
@@ -175,6 +177,33 @@
     display: none;
   }
 
+  /* Transparency-aware preview background for images in the gallery. */
+  .checkerboard {
+    background-image: linear-gradient(45deg, currentColor 25%, transparent 25%),
+      linear-gradient(-45deg, currentColor 25%, transparent 25%),
+      linear-gradient(45deg, transparent 75%, currentColor 75%),
+      linear-gradient(-45deg, transparent 75%, currentColor 75%);
+    background-size: 16px 16px;
+    background-position: 0 0, 0 8px, 8px -8px, -8px 0px;
+  }
+
+  .checkerboard-lg {
+    background-size: 24px 24px;
+    background-position: 0 0, 0 12px, 12px -12px, -12px 0px;
+  }
+
+  /* Dashed ad placeholder frame, matching the reference layout slot. */
+  .ad-slot-frame {
+    border: 2px dashed var(--border);
+    background-image: repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 10px,
+      color-mix(in srgb, var(--foreground) 4%, transparent) 10px,
+      color-mix(in srgb, var(--foreground) 4%, transparent) 20px
+    );
+  }
+
   .text-balance {
     text-wrap: balance;
   }
@@ -188,6 +217,28 @@
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes accordion-down {
+  from {
+    height: 0;
+    opacity: 0;
+  }
+  to {
+    height: var(--radix-accordion-content-height);
+    opacity: 1;
+  }
+}
+
+@keyframes accordion-up {
+  from {
+    height: var(--radix-accordion-content-height);
+    opacity: 1;
+  }
+  to {
+    height: 0;
+    opacity: 0;
   }
 }
 

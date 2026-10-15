@@ -90,7 +90,7 @@ export function SelectionBar({
             <Download className="size-4" /> Download {selectedCount > 1 ? "files" : "file"}
           </Button>
 
-          <Button onClick={onDownloadZip} disabled={disabled} className="min-w-[11rem]">
+          <Button onClick={onDownloadZip} disabled={disabled} className="min-w-[13rem]">
             {zipping ? (
               <>
                 <Loader2 className="size-4 animate-spin" />
@@ -98,7 +98,8 @@ export function SelectionBar({
               </>
             ) : (
               <>
-                <Package className="size-4" /> Download as ZIP
+                <Package className="size-4" /> Download {selectedCount}{" "}
+                {selectedCount === 1 ? "image" : "images"} as ZIP
               </>
             )}
           </Button>
