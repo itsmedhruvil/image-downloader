@@ -1,4 +1,10 @@
-import { finalizeCandidates, parseCssUrls, type RawCandidate } from "./extract.core";
+import {
+  decodeHtmlEntities,
+  finalizeCandidates,
+  isLikelyAssetUrl,
+  parseCssUrls,
+  type RawCandidate,
+} from "./extract.core";
 import type { ExtractedImage } from "./types";
 
 const IMG_URL_ATTRIBUTES = [
@@ -20,7 +26,15 @@ const SRCSET_ATTRIBUTES = ["srcset", "data-srcset", "data-lazy-srcset", "imagesr
 const IMAGE_URL_REGEX =
   /https?:\/\/[^\s"'<>()\\]+?\.(?:jpe?g|png|webp|svg|gif|ico|avif|bmp|tiff?|heic)(?:\?[^\s"'<>()\\]*)?/gi;
 
-const DEFAULT_BASE = "https://html-paste.local/";
+/**
+ * Base used when the HTML tab has no base URL. Resolving relative paths against
+ * the current origin keeps the result predictable (and lets the proxy report a
+ * clean "unavailable" state) instead of inventing a fake host.
+ */
+const DEFAULT_BASE =
+  typeof window !== "undefined" && window.location?.origin
+    ? `${window.location.origin}/`
+    : "https://html-paste.local/";
 
 function svgToDataUri(element: Element): string | null {
   const outer = element.outerHTML;
@@ -151,7 +165,9 @@ export function extractImagesFromMarkupClient(
     const text = element.textContent ?? "";
     let match: RegExpExecArray | null;
     while ((match = scriptRegex.exec(text)) !== null) {
-      scriptUrlCandidates.push({ value: match[0], source: "meta" });
+      const url = decodeHtmlEntities(match[0]);
+      if (!isLikelyAssetUrl(url)) continue;
+      scriptUrlCandidates.push({ value: url, source: "meta" });
       if (scriptUrlCandidates.length >= 500) break;
     }
   });

@@ -34,9 +34,14 @@ export function getR2Client(): S3Client {
   const accountId = process.env.R2_ACCOUNT_ID;
   if (!accountId) throw new Error("R2_ACCOUNT_ID is not configured");
 
+  // R2_ENDPOINT allows any S3-compatible service (MinIO, local mocks, other
+  // providers) and defaults to the Cloudflare R2 endpoint.
+  const endpoint =
+    process.env.R2_ENDPOINT?.trim() || `https://${accountId}.r2.cloudflarestorage.com`;
+
   cachedClient = new S3Client({
     region: "auto",
-    endpoint: `https://${accountId}.r2.cloudflarestorage.com`,
+    endpoint,
     forcePathStyle: true,
     credentials: {
       accessKeyId: process.env.R2_ACCESS_KEY_ID ?? "",

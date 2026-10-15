@@ -12,11 +12,6 @@ export type ImageFormat =
   | "heic"
   | "other";
 
-export const RASTER_FORMATS: ImageFormat[] = ["jpg", "png", "webp", "gif", "avif", "bmp", "tiff", "heic"];
-
-/** Formats that can be re-encoded in the browser at download time. */
-export const CONVERTIBLE_FORMATS: ImageFormat[] = ["jpg", "png", "webp", "gif", "avif", "bmp"];
-
 export type ImageSource =
   | "img"
   | "srcset"

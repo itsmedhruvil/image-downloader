@@ -122,6 +122,80 @@ export function parseCssUrls(css: string): string[] {
   return found;
 }
 
+/**
+ * Extensions that are definitely not images. CSS `url(...)` and generic
+ * attribute scans otherwise sweep up fonts, stylesheets and media files.
+ */
+const NON_IMAGE_EXTENSIONS = new Set([
+  "woff",
+  "woff2",
+  "ttf",
+  "otf",
+  "eot",
+  "css",
+  "scss",
+  "sass",
+  "less",
+  "js",
+  "mjs",
+  "cjs",
+  "jsx",
+  "ts",
+  "tsx",
+  "json",
+  "map",
+  "html",
+  "htm",
+  "xhtml",
+  "php",
+  "asp",
+  "aspx",
+  "jsp",
+  "xml",
+  "txt",
+  "md",
+  "csv",
+  "pdf",
+  "zip",
+  "gz",
+  "rar",
+  "7z",
+  "tar",
+  "mp3",
+  "wav",
+  "ogg",
+  "oga",
+  "flac",
+  "m4a",
+  "mp4",
+  "m4v",
+  "webm",
+  "mov",
+  "avi",
+  "mkv",
+  "ogv",
+  "vtt",
+  "srt",
+  "wasm",
+  "apk",
+  "dmg",
+  "exe",
+]);
+
+/** True when the URL's path ends in an extension we know is not an image. */
+export function hasNonImageExtension(value: string): boolean {
+  let path = value;
+  try {
+    path = new URL(value, "https://placeholder.invalid").pathname;
+  } catch {
+    path = value.split(/[?#]/)[0] ?? value;
+  }
+  const last = path.split("/").filter(Boolean).pop() ?? "";
+  const dot = last.lastIndexOf(".");
+  if (dot < 0) return false;
+  return NON_IMAGE_EXTENSIONS.has(last.slice(dot + 1).toLowerCase());
+}
+
 /** Skip things that are definitely not downloadable images. */
 function isUsableReference(value: string): boolean {
   const trimmed = value.trim();
@@ -131,12 +205,59 @@ function isUsableReference(value: string): boolean {
     const mime = trimmed.slice(5).split(/[;,]/)[0]?.toLowerCase() ?? "";
     return mime.startsWith("image/");
   }
+  if (hasNonImageExtension(trimmed)) return false;
   return true;
+}
+
+const NAMED_ENTITIES: Record<string, string> = {
+  amp: "&",
+  lt: "<",
+  gt: ">",
+  quot: '"',
+  apos: "'",
+  nbsp: " ",
+};
+
+/**
+ * Decode the HTML entities that can appear inside a URL.
+ *
+ * cheerio already decodes DOM attributes, but candidates harvested from raw
+ * script text (hydration payloads, JSON-LD) still contain `&amp;`, which both
+ * corrupts the URL and defeats de-duplication.
+ */
+export function decodeHtmlEntities(value: string): string {
+  if (!value.includes("&")) return value;
+
+  return value.replace(/&(#[xX][0-9a-fA-F]+|#[0-9]+|[a-zA-Z]+);/g, (match, entity: string) => {
+    if (entity.startsWith("#")) {
+      const isHex = entity[1] === "x" || entity[1] === "X";
+      const code = Number.parseInt(isHex ? entity.slice(2) : entity.slice(1), isHex ? 16 : 10);
+      if (!Number.isFinite(code) || code < 0 || code > 0x10ffff) return match;
+      return String.fromCodePoint(code);
+    }
+    return NAMED_ENTITIES[entity.toLowerCase()] ?? match;
+  });
+}
+
+/**
+ * Reject URLs that only *look* like assets. The script sweep matches on the file
+ * extension, so wiki-style page URLs (`/wiki/File:Cat.jpg`) can slip through.
+ */
+export function isLikelyAssetUrl(url: string): boolean {
+  try {
+    const parsed = new URL(url);
+    const lastSegment = parsed.pathname.split("/").filter(Boolean).pop() ?? "";
+    // Page titles contain a namespace separator, e.g. File:Cat.jpg or Category:Dogs.png.
+    if (lastSegment.includes(":")) return false;
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 /** Turn a possibly-relative reference into an absolute URL. */
 export function resolveUrl(value: string, baseUrl: string): string | null {
-  const trimmed = value.trim();
+  const trimmed = decodeHtmlEntities(value).trim();
   if (!trimmed) return null;
   if (trimmed.startsWith("data:")) return trimmed;
   try {

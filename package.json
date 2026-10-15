@@ -8,7 +8,13 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "typecheck:tests": "tsc --noEmit -p tests/tsconfig.json",
+    "test": "tsx --tsconfig tests/tsconfig.json tests/extract.test.mts && tsx --tsconfig tests/tsconfig.json tests/r2.test.mts && tsx --tsconfig tests/tsconfig.json tests/ui.test.mts",
+    "test:extract": "tsx --tsconfig tests/tsconfig.json tests/extract.test.mts",
+    "test:r2": "tsx --tsconfig tests/tsconfig.json tests/r2.test.mts",
+    "test:ui": "tsx --tsconfig tests/tsconfig.json tests/ui.test.mts",
+    "icons": "python3 scripts/generate_icons.py"
   },
   "engines": {
     "node": ">=20.9.0"
@@ -38,11 +44,16 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.3.3",
+    "@testing-library/dom": "^10.4.2",
+    "@testing-library/react": "^16.3.3",
+    "@types/jsdom": "^30.0.0",
     "@types/node": "^26.6.5",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
+    "jsdom": "^30.1.2",
     "postcss": "^8.5.30",
     "tailwindcss": "^4.3.3",
+    "tsx": "^4.23.15",
     "typescript": "^5.9.3"
   }
 }

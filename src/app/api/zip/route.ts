@@ -55,8 +55,9 @@ export async function POST(request: Request) {
           skipped: archive.skipped,
         };
         return NextResponse.json(payload);
-      } catch {
-        // Storage hiccup: fall through and stream the archive directly.
+      } catch (error) {
+        // Storage hiccup: log it and fall through to streaming the archive.
+        console.error("[api/zip] R2 upload failed, streaming instead:", error);
       }
     }
 

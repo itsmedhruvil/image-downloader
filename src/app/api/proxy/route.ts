@@ -72,6 +72,8 @@ export async function GET(request: Request) {
       process.env.FETCH_USER_AGENT?.trim() ||
       "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36",
     Accept: "image/avif,image/webp,image/png,image/svg+xml,image/*,*/*;q=0.8",
+    // Ask for uncompressed bytes so the reported size matches what the browser stores.
+    "Accept-Encoding": "identity",
     Referer: `${safeUrl.origin}/`,
   };
 

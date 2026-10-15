@@ -9,7 +9,6 @@ import { FilterBar, DEFAULT_FILTERS, type Filters } from "@/components/extractor
 import { SelectionBar } from "@/components/extractor/selection-bar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
@@ -22,7 +21,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { extractImagesFromMarkupClient, extractTitleClient } from "@/lib/extract.client";
-import { FORMAT_LABELS, SOURCE_LABELS, normalizeSiteUrl } from "@/lib/extract.core";
+import { FORMAT_LABELS, SOURCE_LABELS } from "@/lib/extract.core";
 import {
   buildClientZip,
   downloadBlob,
@@ -31,7 +30,7 @@ import {
   triggerDownload,
 } from "@/lib/download";
 import type { ExtractMethod, ExtractResponse, ExtractedImage, ImageFormat, ZipResponse } from "@/lib/types";
-import { cn, formatBytes, pluralize, shortenUrl } from "@/lib/utils";
+import { formatBytes, pluralize, shortenUrl } from "@/lib/utils";
 
 const SUGGESTIONS = ["shopify.com", "unsplash.com", "behance.net", "dribbble.com", "wikipedia.org"];
 const SIZE_MEASURE_LIMIT = 120;

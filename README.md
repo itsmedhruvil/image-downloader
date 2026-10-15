@@ -82,6 +82,7 @@ directly. Its free tier includes 10 GB of storage and generous Class A/B operati
 | `R2_ACCESS_KEY_ID` | No | R2 API token access key id |
 | `R2_SECRET_ACCESS_KEY` | No | R2 API token secret |
 | `R2_BUCKET` | No | Bucket that holds generated archives |
+| `R2_ENDPOINT` | No | Override the S3 endpoint (MinIO, local mocks, other S3-compatible stores) |
 | `R2_ZIP_TTL_SECONDS` | No | Archive lifetime in seconds (default `3600`) |
 | `R2_PUBLIC_URL` | No | Reserved for a public bucket base URL (not required) |
 | `FETCH_USER_AGENT` | No | Override the outbound user agent |
@@ -141,6 +142,25 @@ scripts/generate_icons.py        # regenerates the monochrome PWA icons
 | Page fetch timeout | 20 s |
 | Max page size scanned | 8 MB |
 | Bulk URLs per request | 5 |
+
+## Testing
+
+Three suites run without a browser or network access, using `tsx` + `jsdom`:
+
+```bash
+npm test              # all suites
+npm run test:extract  # shared helpers, cheerio collector, DOMParser collector, ZIP builder
+npm run test:r2       # Cloudflare R2 round trip against an in-memory S3 mock
+npm run test:ui       # React extractor flow in jsdom (gallery, filters, selection, ZIP, dialog)
+```
+
+| Suite | Covers |
+| --- | --- |
+| `extract` | Format detection, srcset/CSS parsing, entity decoding, false-positive filters, both collectors, filename generation, ZIP packaging and failure handling |
+| `r2` | `isR2Configured`, key generation, TTL parsing, PUT/GET/DELETE against an S3-compatible mock, bucket scoping |
+| `ui` | Tab switching, HTML-mode extraction, gallery rendering, format filters, select-all, ZIP request payload, selection reset, preview dialog, clipboard copy, theme bootstrap and theme menu |
+
+`npm run typecheck` checks the app; `npm run typecheck:tests` checks the test sources.
 
 ## Regenerating the icons
 

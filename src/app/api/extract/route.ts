@@ -17,6 +17,14 @@ interface ExtractBody {
   html?: string;
 }
 
+/** Raised for input the user can fix, so the API can answer 400 instead of 502. */
+class InvalidInputError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "InvalidInputError";
+  }
+}
+
 /** POST /api/extract — scan a page (or raw markup) and return every image. */
 export async function POST(request: Request) {
   const startedAt = Date.now();
@@ -70,13 +78,14 @@ export async function POST(request: Request) {
     const allImages: ExtractResponse["images"] = [];
     const seen = new Set<string>();
     let pagesScanned = 0;
+    let invalidInputs = 0;
     let firstTitle: string | null = null;
     let firstResolved: string | null = null;
 
     const results = await Promise.allSettled(
       inputs.map(async (input) => {
         const normalized = normalizeSiteUrl(input);
-        if (!normalized) throw new Error(`"${input}" is not a valid URL.`);
+        if (!normalized) throw new InvalidInputError(`"${input}" is not a valid URL.`);
         const safeUrl = await assertPublicHttpUrl(normalized);
         const page = await fetchPageHtml(safeUrl.toString());
         return { page, input };
@@ -86,12 +95,11 @@ export async function POST(request: Request) {
     results.forEach((result, index) => {
       if (result.status === "rejected") {
         const reason = result.reason;
+        const isInvalid =
+          reason instanceof InvalidInputError || reason instanceof UnsafeUrlError;
+        if (isInvalid) invalidInputs += 1;
         const message =
-          reason instanceof UnsafeUrlError
-            ? reason.message
-            : reason instanceof Error
-              ? reason.message
-              : "Unknown error";
+          reason instanceof Error ? reason.message : "Unknown error";
         warnings.push(`${inputs[index]}: ${message}`);
         return;
       }
@@ -114,12 +122,16 @@ export async function POST(request: Request) {
     });
 
     if (pagesScanned === 0) {
+      const allInvalid = invalidInputs === inputs.length;
       return NextResponse.json(
         {
-          error: "Could not fetch that page.",
+          error: allInvalid
+            ? (warnings[0]?.split(": ").slice(1).join(": ") ??
+              "That URL cannot be fetched.")
+            : "Could not fetch that page.",
           details: warnings,
         },
-        { status: 502 },
+        { status: allInvalid ? 400 : 502 },
       );
     }
 

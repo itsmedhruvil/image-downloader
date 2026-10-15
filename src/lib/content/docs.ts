@@ -230,6 +230,7 @@ export const DOC_SECTIONS: DocSection[] = [
           ["R2_ACCESS_KEY_ID", "No", "R2 API token access key id."],
           ["R2_SECRET_ACCESS_KEY", "No", "R2 API token secret."],
           ["R2_BUCKET", "No", "Bucket that holds generated archives."],
+          ["R2_ENDPOINT", "No", "Override the S3 endpoint (MinIO or other S3-compatible stores)."],
           ["R2_ZIP_TTL_SECONDS", "No", "Archive lifetime in seconds (default 3600)."],
           ["FETCH_USER_AGENT", "No", "Override the outbound user agent."],
         ],

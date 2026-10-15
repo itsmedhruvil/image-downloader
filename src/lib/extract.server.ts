@@ -1,6 +1,6 @@
 import * as cheerio from "cheerio";
 
-import { finalizeCandidates, parseCssUrls, type RawCandidate } from "./extract.core";
+import { decodeHtmlEntities, finalizeCandidates, isLikelyAssetUrl, parseCssUrls, type RawCandidate } from "./extract.core";
 import type { ExtractedImage } from "./types";
 
 /** Attributes commonly used for lazy-loaded images, in rough priority order. */
@@ -185,8 +185,9 @@ export function scanScriptsForImageUrls(html: string): RawCandidate[] {
   let match: RegExpExecArray | null;
 
   while ((match = regex.exec(html)) !== null) {
-    const url = match[0];
+    const url = decodeHtmlEntities(match[0]);
     if (seen.has(url)) continue;
+    if (!isLikelyAssetUrl(url)) continue;
     seen.add(url);
     candidates.push({ value: url, source: "meta" });
     if (candidates.length >= 500) break;
