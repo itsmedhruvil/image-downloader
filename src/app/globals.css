@@ -164,10 +164,23 @@
     border-radius: 9999px;
   }
 
+  /* Faint blueprint texture behind hero sections. Intentionally barely visible:
+     a grid line at 4% reads as texture, not as a table. The radial mask fades it
+     out towards the edges so it never competes with the headline. Explicit
+     low-alpha colours are used (rather than color-mix) so no engine can fall back
+     to a full-strength grid. */
   .grid-paper {
-    background-image: linear-gradient(to right, var(--foreground) 1px, transparent 1px),
-      linear-gradient(to bottom, var(--foreground) 1px, transparent 1px);
+    --grid-line: rgba(0, 0, 0, 0.04);
+    background-image: linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
+      linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
     background-size: 48px 48px;
+    -webkit-mask-image: radial-gradient(ellipse 90% 70% at 50% 0%, #000 25%, transparent 78%);
+    mask-image: radial-gradient(ellipse 90% 70% at 50% 0%, #000 25%, transparent 78%);
+  }
+
+  /* White lines on black read stronger, so drop the dark-mode grid a touch more. */
+  .dark .grid-paper {
+    --grid-line: rgba(255, 255, 255, 0.03);
   }
 
   .no-scrollbar {
