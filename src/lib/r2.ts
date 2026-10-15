@@ -5,6 +5,8 @@ import {
   S3Client,
 } from "@aws-sdk/client-s3";
 
+import { isArchiveStorageConfigured } from "./storage-mode";
+
 /**
  * Cloudflare R2 (S3-compatible) archive storage.
  *
@@ -17,12 +19,7 @@ import {
 let cachedClient: S3Client | null = null;
 
 export function isR2Configured(): boolean {
-  return Boolean(
-    process.env.R2_ACCOUNT_ID &&
-      process.env.R2_ACCESS_KEY_ID &&
-      process.env.R2_SECRET_ACCESS_KEY &&
-      process.env.R2_BUCKET,
-  );
+  return isArchiveStorageConfigured();
 }
 
 export function getR2Bucket(): string {

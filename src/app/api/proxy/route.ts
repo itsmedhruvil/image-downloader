@@ -67,17 +67,54 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: message }, { status: 400 });
   }
 
+  const upstreamHeaders: Record<string, string> = {
+    "User-Agent":
+      process.env.FETCH_USER_AGENT?.trim() ||
+      "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36",
+    Accept: "image/avif,image/webp,image/png,image/svg+xml,image/*,*/*;q=0.8",
+    Referer: `${safeUrl.origin}/`,
+  };
+
+  // `?meta=1` reports the upstream size without transferring the whole file, so
+  // the gallery can show file sizes cheaply.
+  if (searchParams.get("meta") === "1") {
+    try {
+      const head = await fetch(safeUrl.toString(), {
+        method: "HEAD",
+        redirect: "follow",
+        signal: AbortSignal.timeout(10_000),
+        headers: upstreamHeaders,
+      });
+      let size = Number(head.headers.get("content-length") ?? "0");
+      const contentType = (head.headers.get("content-type") ?? "").split(";")[0]?.trim() ?? "";
+
+      if (!size) {
+        const ranged = await fetch(safeUrl.toString(), {
+          redirect: "follow",
+          signal: AbortSignal.timeout(10_000),
+          headers: { ...upstreamHeaders, Range: "bytes=0-0" },
+        });
+        const contentRange = ranged.headers.get("content-range");
+        if (contentRange) {
+          const total = Number(contentRange.split("/")[1] ?? "0");
+          if (Number.isFinite(total)) size = total;
+        }
+      }
+
+      return NextResponse.json(
+        { size: size > 0 ? size : null, contentType: contentType || null },
+        { headers: { "Cache-Control": "public, max-age=3600" } },
+      );
+    } catch {
+      return NextResponse.json({ size: null, contentType: null });
+    }
+  }
+
   try {
     const response = await fetch(safeUrl.toString(), {
       redirect: "follow",
       signal: AbortSignal.timeout(PROXY_TIMEOUT_MS),
-      headers: {
-        "User-Agent":
-          process.env.FETCH_USER_AGENT?.trim() ||
-          "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36",
-        Accept: "image/avif,image/webp,image/png,image/svg+xml,image/*,*/*;q=0.8",
-        Referer: `${safeUrl.origin}/`,
-      },
+      headers: upstreamHeaders,
     });
 
     if (!response.ok) {

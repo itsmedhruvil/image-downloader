@@ -39,7 +39,10 @@ function svgToDataUri(outerHtml: string): string | null {
  * lazy-load attributes, srcset/sizes pairs, CSS background images, inline SVG
  * and social/meta image declarations.
  */
-export function collectCandidates(html: string, documentUrl: string): RawCandidate[] {
+export function collectCandidates(
+  html: string,
+  documentUrl: string,
+): { base: string; candidates: RawCandidate[] } {
   const $ = cheerio.load(html);
   const candidates: RawCandidate[] = [];
 

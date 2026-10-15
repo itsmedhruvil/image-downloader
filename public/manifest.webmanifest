@@ -1,0 +1,55 @@
+{
+  "name": "Website Image Extractor — Free Image Download Tool",
+  "short_name": "ImgExtractor",
+  "description": "Extract every image from any website or HTML, filter them, and download as a ZIP. Free, private and instant.",
+  "start_url": "/?source=pwa",
+  "scope": "/",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
+  "orientation": "any",
+  "background_color": "#ffffff",
+  "theme_color": "#000000",
+  "lang": "en",
+  "dir": "ltr",
+  "categories": ["utilities", "productivity", "developer"],
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Extract from a URL",
+      "short_name": "URL",
+      "url": "/?mode=url",
+      "description": "Paste a website URL and extract every image"
+    },
+    {
+      "name": "Paste HTML",
+      "short_name": "HTML",
+      "url": "/?mode=html",
+      "description": "Parse raw HTML or CSS for images"
+    }
+  ]
+}

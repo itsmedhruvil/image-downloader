@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#000000" />
+    <title>Offline · Website Image Extractor</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+        --bg: #ffffff;
+        --fg: #000000;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #000000;
+          --fg: #ffffff;
+        }
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        min-height: 100dvh;
+        display: grid;
+        place-items: center;
+        padding: 2rem;
+        background: var(--bg);
+        color: var(--fg);
+        font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+      }
+      main {
+        max-width: 32rem;
+        width: 100%;
+        border: 1px solid var(--fg);
+        border-radius: 6px;
+        padding: 2rem;
+        text-align: center;
+      }
+      h1 {
+        margin: 0 0 0.75rem;
+        font-size: 1.5rem;
+        letter-spacing: -0.02em;
+      }
+      p {
+        margin: 0 0 1.5rem;
+        line-height: 1.6;
+        opacity: 0.75;
+      }
+      a {
+        display: inline-block;
+        padding: 0.6rem 1.25rem;
+        border: 1px solid var(--fg);
+        border-radius: 4px;
+        background: var(--fg);
+        color: var(--bg);
+        text-decoration: none;
+        font-size: 0.875rem;
+        font-weight: 600;
+      }
+      small {
+        display: block;
+        margin-top: 1.5rem;
+        font-size: 0.7rem;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        opacity: 0.6;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>You are offline</h1>
+      <p>
+        The extractor needs a connection to fetch pages. Your previous results stay on screen — the
+        app will resume as soon as you reconnect.
+      </p>
+      <a href="/">Try again</a>
+      <small>Website Image Extractor · free &amp; private</small>
+    </main>
+  </body>
+</html>

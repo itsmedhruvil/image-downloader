@@ -84,7 +84,7 @@ export async function assertPublicHttpUrl(rawUrl: string): Promise<URL> {
     }
     for (const record of records) {
       const address = record.address;
-      const version = record.family === 6 || record.family === "IPv6" ? 6 : 4;
+      const version = record.family === 6 ? 6 : 4;
       if (version === 6 ? isPrivateIpv6(address) : isPrivateIpv4(address)) {
         throw new UnsafeUrlError("That host resolves to a private network address.");
       }
