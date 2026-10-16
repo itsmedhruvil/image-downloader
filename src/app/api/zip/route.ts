@@ -9,7 +9,7 @@ export const maxDuration = 60;
 export const dynamic = "force-dynamic";
 
 interface ZipBodyRequest {
-  images?: { url?: string; name?: string }[];
+  images?: { url?: string; name?: string; credit?: string }[];
 }
 
 /**
@@ -29,8 +29,12 @@ export async function POST(request: Request) {
 
   const rawImages = Array.isArray(body.images) ? body.images : [];
   const images = rawImages
-    .filter((image): image is { url: string; name?: string } => typeof image?.url === "string")
-    .map((image) => ({ url: image.url, name: typeof image.name === "string" ? image.name : "" }))
+    .filter((image): image is { url: string; name?: string; credit?: string } => typeof image?.url === "string")
+    .map((image) => ({
+      url: image.url,
+      name: typeof image.name === "string" ? image.name : "",
+      credit: typeof image.credit === "string" ? image.credit : undefined,
+    }))
     .slice(0, ZIP_LIMITS.maxImages);
 
   if (images.length === 0) {
@@ -53,6 +57,7 @@ export async function POST(request: Request) {
           stored: true,
           expiresAt: new Date(Date.now() + ttl * 1000).toISOString(),
           skipped: archive.skipped,
+          credited: archive.credited,
         };
         return NextResponse.json(payload);
       } catch (error) {
@@ -68,6 +73,7 @@ export async function POST(request: Request) {
         "Content-Disposition": `attachment; filename="${archive.filename}"`,
         "X-Archive-Images": String(archive.included),
         "X-Archive-Skipped": String(archive.skipped.length),
+        "X-Archive-Credited": String(archive.credited),
         "Cache-Control": "no-store",
       },
     });

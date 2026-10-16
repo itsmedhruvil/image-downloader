@@ -1,5 +1,6 @@
 import JSZip from "jszip";
 
+import { buildCreditsFile, CREDITS_FILENAME } from "./credits";
 import { buildFilename, guessFormat } from "./extract.core";
 import type { ExtractedImage } from "./types";
 
@@ -15,6 +16,8 @@ export const ZIP_LIMITS = {
 export interface ZipInput {
   url: string;
   name: string;
+  /** Attribution line; when present a credits.txt is added to the archive. */
+  credit?: string;
 }
 
 export interface ZipBuildResult {
@@ -23,6 +26,8 @@ export interface ZipBuildResult {
   included: number;
   skipped: string[];
   bytes: number;
+  /** Number of credited images included (0 when the archive needs no credits). */
+  credited: number;
 }
 
 const DEFAULT_USER_AGENT =
@@ -117,6 +122,8 @@ export async function buildImageZip(inputs: ZipInput[]): Promise<ZipBuildResult>
   });
 
   let included = 0;
+  const credits: string[] = [];
+
   for (const { input, buffer } of fetched) {
     if (!buffer) {
       skipped.push(input.url);
@@ -137,12 +144,18 @@ export async function buildImageZip(inputs: ZipInput[]): Promise<ZipBuildResult>
     const filename = buildFilename(image, included, used);
 
     zip.file(filename, buffer);
+    if (input.credit?.trim()) credits.push(`${filename} — ${input.credit.trim()}`);
     totalBytes += buffer.byteLength;
     included += 1;
   }
 
   if (included === 0) {
     throw new ZipEmptyError(skipped);
+  }
+
+  // Stock images require attribution, so ship the credits alongside them.
+  if (credits.length > 0) {
+    zip.file(CREDITS_FILENAME, buildCreditsFile(credits));
   }
 
   const buffer = await zip.generateAsync({
@@ -157,6 +170,7 @@ export async function buildImageZip(inputs: ZipInput[]): Promise<ZipBuildResult>
     included,
     skipped,
     bytes: buffer.byteLength,
+    credited: credits.length,
   };
 }
 

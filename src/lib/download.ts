@@ -1,3 +1,4 @@
+import { buildCreditsFile, CREDITS_FILENAME } from "@/lib/credits";
 import { buildFilename, guessFormat } from "@/lib/extract.core";
 import type { ExtractedImage, ImageFormat } from "@/lib/types";
 
@@ -141,6 +142,7 @@ export async function buildClientZip(
   const { default: JSZip } = await import("jszip");
   const zip = new JSZip();
   const used = new Set<string>();
+  const credits: string[] = [];
   let included = 0;
   let skipped = 0;
   let done = 0;
@@ -155,6 +157,7 @@ export async function buildClientZip(
           : blob;
       const filename = buildFilename({ ...image, format }, index, used);
       zip.file(filename, output);
+      if (image.credit?.trim()) credits.push(`${filename} — ${image.credit.trim()}`);
       included += 1;
     } catch {
       skipped += 1;
@@ -165,6 +168,10 @@ export async function buildClientZip(
   });
 
   void results;
+
+  if (credits.length > 0) {
+    zip.file(CREDITS_FILENAME, buildCreditsFile(credits));
+  }
 
   const blob = await zip.generateAsync({ type: "blob", compression: "DEFLATE" });
   const stamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-");

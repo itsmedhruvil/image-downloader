@@ -1,12 +1,13 @@
 "use client";
 
 import * as React from "react";
-import { AlertTriangle, Code2, Layers, Link2, Loader2, Search, Sparkles, Trash2 } from "lucide-react";
+import { AlertTriangle, Code2, Image as ImageIcon, Layers, Link2, Loader2, Search, Sparkles, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { ImageCard, type Measured } from "@/components/extractor/image-card";
 import { FilterBar, DEFAULT_FILTERS, type Filters } from "@/components/extractor/filter-bar";
 import { SelectionBar } from "@/components/extractor/selection-bar";
+import { StockPanel, type StockMeta } from "@/components/extractor/stock-panel";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -267,6 +268,39 @@ export function Extractor({ storage }: ExtractorProps) {
     [images, selected],
   );
 
+  /**
+   * Stock search results arrive with provider-reported dimensions, so the
+   * dimension filters work immediately without waiting for the tiles to paint.
+   */
+  const handleStockResults = React.useCallback(
+    (found: ExtractedImage[], meta: StockMeta) => {
+      setImages(found);
+      setSummary({
+        images: found,
+        resolvedUrl: null,
+        title: meta.title,
+        pagesScanned: 1,
+        warnings: meta.warnings,
+        durationMs: meta.durationMs,
+      });
+      setSelected(new Set());
+      setExtracted(true);
+      setError(null);
+
+      const seeded: Record<string, Measured> = {};
+      for (const image of found) {
+        if (image.width && image.height) {
+          seeded[image.url] = { width: image.width, height: image.height, size: null };
+        }
+      }
+      setMeasured(seeded);
+
+      recordExtraction({ images: found.length });
+      void measureSizes(found);
+    },
+    [measureSizes],
+  );
+
   const downloadZip = React.useCallback(async () => {
     if (selectedImages.length === 0) return;
     setZipping(true);
@@ -295,7 +329,11 @@ export function Extractor({ storage }: ExtractorProps) {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
-          images: selectedImages.map((image) => ({ url: image.url, name: image.name })),
+          images: selectedImages.map((image) => ({
+            url: image.url,
+            name: image.name,
+            credit: image.credit,
+          })),
         }),
       });
 
@@ -355,20 +393,25 @@ export function Extractor({ storage }: ExtractorProps) {
     <section id="scraper" className="scroll-mt-24">
       <div className="rounded-lg border border-border bg-card p-4 sm:p-6">
         <Tabs value={method} onValueChange={(value) => setMethod(value as ExtractMethod)}>
-          <TabsList>
-            <TabsTrigger value="url">
-              <Link2 className="size-3.5" /> Website URL
-            </TabsTrigger>
-            <TabsTrigger value="html">
-              <Code2 className="size-3.5" /> HTML code
-            </TabsTrigger>
-            <TabsTrigger value="bulk">
-              <Layers className="size-3.5" /> Bulk URLs
-              <span className="ml-1 rounded-sm bg-foreground px-1 py-px text-[8.5px] font-bold uppercase tracking-[0.08em] text-background">
-                New
-              </span>
-            </TabsTrigger>
-          </TabsList>
+          <div className="-mx-1 max-w-full overflow-x-auto px-1 no-scrollbar">
+            <TabsList>
+              <TabsTrigger value="url">
+                <Link2 className="size-3.5" /> Website URL
+              </TabsTrigger>
+              <TabsTrigger value="html">
+                <Code2 className="size-3.5" /> HTML code
+              </TabsTrigger>
+              <TabsTrigger value="bulk">
+                <Layers className="size-3.5" /> Bulk URLs
+              </TabsTrigger>
+              <TabsTrigger value="stock">
+                <ImageIcon className="size-3.5" /> Stock photos
+                <span className="ml-1 rounded-sm bg-foreground px-1 py-px text-[8.5px] font-bold uppercase tracking-[0.08em] text-background">
+                  New
+                </span>
+              </TabsTrigger>
+            </TabsList>
+          </div>
 
           <TabsContent value="url">
             <form
@@ -451,6 +494,9 @@ export function Extractor({ storage }: ExtractorProps) {
                 Extract all
               </Button>
             </div>
+          </TabsContent>
+          <TabsContent value="stock">
+            <StockPanel onResults={handleStockResults} onError={setError} setBusy={setLoading} />
           </TabsContent>
         </Tabs>
 
@@ -586,7 +632,7 @@ export function Extractor({ storage }: ExtractorProps) {
                   {preview.name || shortenUrl(preview.url, 60)}
                 </DialogTitle>
                 <DialogDescription className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] uppercase tracking-[0.1em]">
-                  <span>{FORMAT_LABELS[preview.format]}</span>
+                  <span>{preview.provider ?? FORMAT_LABELS[preview.format]}</span>
                   <span>{SOURCE_LABELS[preview.source]}</span>
                   {measured[preview.url]?.width && measured[preview.url]?.height ? (
                     <span>
@@ -598,6 +644,25 @@ export function Extractor({ storage }: ExtractorProps) {
                   ) : null}
                 </DialogDescription>
               </DialogHeader>
+
+              {preview.credit ? (
+                <p className="rounded-md border border-border px-3 py-2 text-xs opacity-80">
+                  {preview.credit}
+                  {preview.attributionUrl ? (
+                    <>
+                      {" — "}
+                      <a
+                        className="underline underline-offset-4"
+                        href={preview.attributionUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        source page
+                      </a>
+                    </>
+                  ) : null}
+                </p>
+              ) : null}
 
               <div className="relative flex max-h-[55vh] items-center justify-center overflow-hidden rounded-md border border-border bg-background p-2">
                 <span

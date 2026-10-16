@@ -41,15 +41,25 @@ export const ImageCard = React.memo(function ImageCard({
   onPreview,
   onNotify,
 }: ImageCardProps) {
-  const [src, setSrc] = React.useState(() => proxiedUrl(image.url));
+  const [src, setSrc] = React.useState(() => proxiedUrl(image.previewUrl ?? image.url));
   const [stage, setStage] = React.useState<"loading" | "ready" | "failed">("loading");
   const [busy, setBusy] = React.useState(false);
-  const fallbackTried = React.useRef(false);
+  const attempt = React.useRef(0);
+
+  // Stock results ship a small preview variant, so tiles try the cheaper source
+  // first and only fall back to the full-size file if that fails.
+  const sources = React.useMemo(() => {
+    const primary = image.previewUrl ?? image.url;
+    const list = [proxiedUrl(primary), primary];
+    if (primary !== image.url) list.push(image.url);
+    return list;
+  }, [image.previewUrl, image.url]);
 
   const handleError = () => {
-    if (!fallbackTried.current && !image.url.startsWith("data:")) {
-      fallbackTried.current = true;
-      setSrc(image.url);
+    const next = attempt.current + 1;
+    if (next < sources.length) {
+      attempt.current = next;
+      setSrc(sources[next] as string);
       return;
     }
     setStage("failed");
@@ -155,14 +165,14 @@ export const ImageCard = React.memo(function ImageCard({
 
       <div className="flex flex-col gap-2 border-t border-border p-2.5">
         <div className="min-w-0">
-          <p className="truncate text-xs font-semibold" title={image.url}>
+          <p className="truncate text-xs font-semibold" title={image.credit ?? image.url}>
             {image.name || shortenUrl(image.url)}
           </p>
           <p className="mt-0.5 flex flex-wrap items-center gap-x-2 text-[10px] uppercase tracking-[0.1em] opacity-60">
-            <span>{SOURCE_LABELS[image.source]}</span>
+            <span>{image.provider ?? SOURCE_LABELS[image.source]}</span>
             {dimensions ? <span>{dimensions}</span> : null}
             {measured?.size ? <span>{formatBytes(measured.size)}</span> : null}
-            {image.crossOrigin ? <span>external</span> : null}
+            {!image.provider && image.crossOrigin ? <span>external</span> : null}
           </p>
         </div>
 
