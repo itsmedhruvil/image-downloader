@@ -1,11 +1,4 @@
-import type { ContentBlock } from "./blog";
-
-export interface DocSection {
-  id: string;
-  title: string;
-  summary: string;
-  blocks: ContentBlock[];
-}
+import type { DocSection } from "./types";
 
 export const DOC_SECTIONS: DocSection[] = [
   {
@@ -15,20 +8,20 @@ export const DOC_SECTIONS: DocSection[] = [
     blocks: [
       {
         type: "p",
-        text: "Website Image Extractor is a free, browser-based tool for pulling every image off a public web page. There is nothing to install and no account to create.",
+        text: "Website Image Extractor is the internal tool for pulling every image off a web page, a batch of pages, pasted markup, or the configured stock photo providers. Nothing to install and no account to create — it runs on our own infrastructure.",
       },
       {
         type: "ol",
         items: [
           "Paste a page address into the URL field and press Extract (or Enter).",
-          "Review the gallery — each tile shows format, dimensions and file size.",
+          "Review the gallery — each tile shows source, format, dimensions and file size.",
           "Narrow the results with the format, dimension and size filters.",
           "Select the images you want and choose Download as ZIP, or download them one by one.",
         ],
       },
       {
         type: "p",
-        text: "Extraction runs entirely in memory. No URL you submit is logged and no image is retained after the request finishes.",
+        text: "Extraction runs entirely in memory. Submitted URLs are not logged and no image is retained after the request finishes.",
       },
     ],
   },
@@ -233,8 +226,6 @@ export const DOC_SECTIONS: DocSection[] = [
           ["R2_ENDPOINT", "No", "Override the S3 endpoint (MinIO or other S3-compatible stores)."],
           ["R2_ZIP_TTL_SECONDS", "No", "Archive lifetime in seconds (default 3600)."],
           ["FETCH_USER_AGENT", "No", "Override the outbound user agent."],
-          ["NEXT_PUBLIC_ADSENSE_CLIENT", "No", "AdSense publisher id; unset renders placeholders."],
-          ["NEXT_PUBLIC_ADSENSE_SLOT", "No", "Default AdSense ad-unit slot id."],
           ["UNSPLASH_ACCESS_KEY", "No", "Unsplash access key for stock photo search."],
           ["PEXELS_API_KEY", "No", "Pexels API key for stock photo search."],
           ["PIXABAY_API_KEY", "No", "Pixabay API key for stock photo search."],
@@ -271,18 +262,56 @@ export const DOC_SECTIONS: DocSection[] = [
   },
   {
     id: "faq",
-    title: "FAQ",
-    summary: "Short answers to the questions we get most.",
+    title: "Operational notes",
+    summary: "Access, limits and attribution — the things that matter in day-to-day use.",
     blocks: [
-      { type: "p", text: "Is it really free? Yes — no account, no API key, no paid tier for the core features." },
-      { type: "p", text: "Do you keep my URLs? No. Submissions are processed in memory and never logged." },
       {
         type: "p",
-        text: "Does it handle JavaScript-heavy sites? It handles server-rendered markup plus hydration payloads. Pages that build their image list purely from client-side fetches are best handled with the HTML tab.",
+        text: "Who can use it? Anyone with access to the deployment. There is no login layer; put it behind your own access control (SSO proxy, VPN or Vercel deployment protection) if it should not be reachable.",
       },
       {
         type: "p",
-        text: "Can I use it commercially? The tool is free to use; the images you extract are still subject to their owners' licences.",
+        text: "Are submitted URLs stored? No. They are fetched in memory and discarded when the response is written. The only persistent data is a ZIP archive (when R2 is configured), which expires automatically.",
+      },
+      {
+        type: "p",
+        text: "Why do stock photo results come with a credits.txt? Unsplash, Pexels and Pixabay all require attribution when their images are used. Keep the file with the images if they are published anywhere.",
+      },
+      {
+        type: "p",
+        text: "Is the extraction quality guaranteed? No. Results depend on the markup a site returns at that moment. Login-walled and heavily client-rendered pages are best handled with the HTML tab.",
+      },
+    ],
+  },
+  {
+    id: "stock-sources",
+    title: "Stock photo sources",
+    summary: "Unsplash, Pexels and Pixabay — keys, limits and attribution.",
+    blocks: [
+      {
+        type: "p",
+        text: "The Stock photos tab searches three providers by keyword. Each one is enabled only when its API key is present, so a partially configured deployment still works: the unconfigured providers appear greyed out in the UI.",
+      },
+      {
+        type: "table",
+        headers: ["Provider", "Environment variable", "Free tier"],
+        rows: [
+          ["Unsplash", "UNSPLASH_ACCESS_KEY", "50 requests/hour on the demo tier"],
+          ["Pexels", "PEXELS_API_KEY", "200 requests/hour"],
+          ["Pixabay", "PIXABAY_API_KEY", "100 requests/minute"],
+        ],
+      },
+      {
+        type: "p",
+        text: "Requests fan out sequentially and are capped at 24 provider calls and 200 images per search, so a large batch cannot exhaust a free-tier quota in one go.",
+      },
+      {
+        type: "p",
+        text: "Orientation is translated per provider. Pixabay has no square filter, so square results from Pixabay are filtered by aspect ratio after the fact.",
+      },
+      {
+        type: "p",
+        text: "Every result carries an attribution string, and any ZIP that contains one includes credits.txt listing each file with its credit line.",
       },
     ],
   },

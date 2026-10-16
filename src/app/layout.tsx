@@ -3,15 +3,13 @@ import { Inter } from "next/font/google";
 
 import "./globals.css";
 
+import { PwaRegistrar } from "@/components/pwa-registrar";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
-import { PwaRegistrar } from "@/components/pwa-registrar";
 import { THEME_INIT_SCRIPT } from "@/components/theme-toggle";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { JsonLd } from "@/components/json-ld";
 import { SITE } from "@/lib/site";
-import { organizationLd, webSiteLd } from "@/lib/structured-data";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -22,40 +20,14 @@ const inter = Inter({
 export const metadata: Metadata = {
   metadataBase: new URL(SITE.url),
   title: {
-    default: `${SITE.name} — Free Image Download Tool`,
+    default: SITE.name,
     template: `%s · ${SITE.name}`,
   },
   description: SITE.description,
   applicationName: SITE.name,
-  keywords: [
-    "website image extractor",
-    "download all images from a website",
-    "image scraper",
-    "bulk image download",
-    "extract images from url",
-    "image downloader",
-    "zip images",
-  ],
-  authors: [{ name: SITE.name, url: SITE.url }],
   manifest: "/manifest.webmanifest",
-  alternates: {
-    canonical: "/",
-    types: { "application/rss+xml": `${SITE.url}/rss.xml` },
-  },
-  openGraph: {
-    type: "website",
-    url: SITE.url,
-    siteName: SITE.name,
-    title: `${SITE.name} — Extract every image from any website`,
-    description: SITE.description,
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: `${SITE.name} — Extract every image from any website`,
-    description: SITE.description,
-    creator: "@imgextractor",
-  },
-  robots: { index: true, follow: true },
+  // Internal tool: keep it out of every search index.
+  robots: { index: false, follow: false, nocache: true },
   appleWebApp: {
     capable: true,
     title: SITE.shortName,
@@ -90,10 +62,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
       </head>
       <body className="min-h-dvh antialiased">
-        <JsonLd data={[organizationLd(), webSiteLd()]} />
         <TooltipProvider delayDuration={200}>
           <a
-            href="#scraper"
+            href="#extractor"
             className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[70] focus:rounded-md focus:border focus:border-border focus:bg-background focus:px-4 focus:py-2 focus:text-sm"
           >
             Skip to the extractor

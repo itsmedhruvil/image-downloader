@@ -1,4 +1,4 @@
-import type { ContentBlock } from "@/lib/content/blog";
+import type { ContentBlock } from "@/lib/content/types";
 import { cn } from "@/lib/utils";
 
 /** Renders the structured content blocks used by blog posts and docs. */

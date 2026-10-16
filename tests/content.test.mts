@@ -1,27 +1,15 @@
 /**
- * Verification for the content/SEO layer and the local activity store.
+ * Content, layout and internal-tool invariants.
  *
  *   npm run test:content
  */
 
 import assert from "node:assert/strict";
-import { readdirSync, readFileSync, statSync } from "node:fs";
-import { JSDOM } from "jsdom";
+import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 
-import { FAQ_ENTRIES, blocksToPlainText } from "../src/lib/content/faq";
-import { BLOG_POSTS } from "../src/lib/content/blog";
-import { TIPS, FOOTER_GROUPS } from "../src/lib/site";
-import {
-  blogPostingLd,
-  breadcrumbLd,
-  faqPageLd,
-  homeStructuredData,
-  howToLd,
-  organizationLd,
-  softwareApplicationLd,
-  webApplicationLd,
-  webSiteLd,
-} from "../src/lib/structured-data";
+import { CHANGELOG } from "../src/lib/content/changelog";
+import { DOC_SECTIONS } from "../src/lib/content/docs";
+import { FOOTER_LINKS, NAV_LINKS, SITE } from "../src/lib/site";
 
 let passed = 0;
 const failures: string[] = [];
@@ -38,219 +26,6 @@ async function test(name: string, fn: () => void | Promise<void>) {
   }
 }
 
-// The activity store touches window.localStorage.
-const dom = new JSDOM("<!doctype html><html><body></body></html>", { url: "http://localhost/" });
-const globals = globalThis as unknown as Record<string, unknown>;
-globals.window = dom.window;
-globals.document = dom.window.document;
-Object.defineProperty(globalThis, "localStorage", {
-  value: dom.window.localStorage,
-  configurable: true,
-  writable: true,
-});
-
-const { getStats, recordArchive, recordExtraction, reloadStats, resetStats, subscribe } = await import(
-  "../src/lib/activity-stats"
-);
-
-console.log("\nStructured data");
-
-await test("every JSON-LD block is valid and well-formed", () => {
-  for (const block of homeStructuredData()) {
-    assert.equal(block["@context"], "https://schema.org");
-    assert.ok(typeof block["@type"] === "string", "each block needs an @type");
-    assert.doesNotThrow(() => JSON.parse(JSON.stringify(block)));
-  }
-});
-
-await test("homepage advertises the expected schema types", () => {
-  const types = homeStructuredData().map((block) => block["@type"]);
-  for (const expected of ["WebApplication", "SoftwareApplication", "FAQPage", "HowTo"]) {
-    assert.ok(types.includes(expected), `missing ${expected}`);
-  }
-  // Organization/WebSite are emitted once, globally, from the root layout.
-  assert.ok(!types.includes("Organization"), "Organization belongs to the layout only");
-  assert.ok(!types.includes("WebSite"), "WebSite belongs to the layout only");
-});
-
-await test("global and homepage schema blocks never overlap", () => {
-  const globalTypes: unknown[] = [organizationLd()["@type"], webSiteLd()["@type"]];
-  const homeTypes = homeStructuredData().map((block) => block["@type"]);
-  assert.equal(
-    globalTypes.some((type) => homeTypes.includes(type as string)),
-    false,
-    "a schema type is emitted twice on the homepage",
-  );
-});
-
-await test("WebApplication marks the tool as free", () => {
-  const app = webApplicationLd() as { offers: { price: string }; featureList: string[] };
-  assert.equal(app.offers.price, "0");
-  assert.ok(app.featureList.length >= 5);
-});
-
-await test("FAQPage mirrors every FAQ entry with a non-empty answer", () => {
-  const page = faqPageLd() as {
-    mainEntity: { name: string; acceptedAnswer: { text: string } }[];
-  };
-  assert.equal(page.mainEntity.length, FAQ_ENTRIES.length);
-  for (const entry of page.mainEntity) {
-    assert.ok(entry.name.length > 5, "question text is too short");
-    assert.ok(entry.acceptedAnswer.text.length > 20, `thin answer for: ${entry.name}`);
-    assert.ok(!entry.acceptedAnswer.text.includes("\n"), "answers must be single-line for JSON-LD");
-  }
-});
-
-await test("blocksToPlainText flattens lists, code and tables", () => {
-  const text = blocksToPlainText([
-    { type: "p", text: "Intro." },
-    { type: "ul", items: ["One", "Two"] },
-    { type: "code", text: "example.com" },
-    { type: "table", headers: ["A", "B"], rows: [["1", "2"]] },
-  ]);
-  assert.ok(text.includes("Intro."));
-  assert.ok(text.includes("One Two"));
-  assert.ok(text.includes("example.com"));
-  assert.ok(text.includes("A — B"));
-  assert.ok(text.includes("1 — 2"));
-});
-
-await test("HowTo describes three ordered steps", () => {
-  const howTo = howToLd() as { step: { position: number; name: string; text: string }[] };
-  assert.equal(howTo.step.length, 3);
-  assert.deepEqual(
-    howTo.step.map((step) => step.position),
-    [1, 2, 3],
-  );
-  assert.ok(howTo.step.every((step) => step.text.length > 20));
-});
-
-await test("Organization and WebSite reference the canonical URL", () => {
-  const org = organizationLd() as { url: string; sameAs: string[] };
-  assert.ok(org.url.startsWith("https://"));
-  assert.ok(org.sameAs.length >= 2);
-
-  const site = webSiteLd() as { potentialAction: { target: { urlTemplate: string } } };
-  assert.ok(site.potentialAction.target.urlTemplate.includes("{search_term_string}"));
-});
-
-await test("every blog post produces a BlogPosting plus breadcrumbs", () => {
-  for (const post of BLOG_POSTS) {
-    const ld = blogPostingLd(post) as { headline: string; wordCount: number; datePublished: string };
-    assert.equal(ld.headline, post.title);
-    assert.equal(ld.datePublished, post.date);
-    assert.ok(ld.wordCount > 100, `wordCount looks wrong for ${post.slug}`);
-
-    const crumbs = breadcrumbLd([
-      { name: "Home", path: "/" },
-      { name: "Blog", path: "/blog" },
-    ]) as { itemListElement: { position: number }[] };
-    assert.deepEqual(
-      crumbs.itemListElement.map((item) => item.position),
-      [1, 2],
-    );
-  }
-});
-
-await test("software application schema omits fabricated ratings", () => {
-  const app = softwareApplicationLd();
-  assert.ok(!("aggregateRating" in app), "self-supplied ratings are not allowed");
-});
-
-console.log("\nRSS feed");
-
-await test("/rss.xml returns well-formed XML with every post", async () => {
-  const { GET } = await import("../src/app/rss.xml/route");
-  const response = await GET();
-  assert.equal(response.status, 200);
-  assert.match(response.headers.get("content-type") ?? "", /application\/rss\+xml/);
-
-  const xml = await response.text();
-  assert.ok(xml.startsWith('<?xml version="1.0" encoding="UTF-8"?>'));
-  assert.ok(xml.includes('<rss version="2.0"'));
-  assert.ok(xml.trimEnd().endsWith("</rss>"));
-
-  const items = xml.match(/<item>/g) ?? [];
-  assert.equal(items.length, BLOG_POSTS.length);
-  for (const post of BLOG_POSTS) {
-    assert.ok(xml.includes(`https://websiteimagextractor.com/blog/${post.slug}`));
-  }
-  // No bare ampersands (they would break strict feed readers).
-  assert.equal(/&(?!(amp|lt|gt|quot|apos|#\d+);)/.test(xml), false);
-});
-
-console.log("\nActivity stats store");
-
-await test("stats start empty and increment independently", () => {
-  resetStats();
-  assert.deepEqual(getStats(), { urls: 0, images: 0, archives: 0 });
-
-  recordExtraction({ urls: 2, images: 41 });
-  assert.deepEqual(getStats(), { urls: 2, images: 41, archives: 0 });
-
-  recordExtraction({ urls: 1, images: 9 });
-  recordArchive();
-  assert.deepEqual(getStats(), { urls: 3, images: 50, archives: 1 });
-});
-
-await test("subscribers are notified on every change", () => {
-  resetStats();
-  let notifications = 0;
-  const unsubscribe = subscribe(() => {
-    notifications += 1;
-  });
-
-  recordExtraction({ images: 5 });
-  recordArchive();
-  assert.equal(notifications, 2);
-
-  unsubscribe();
-  recordExtraction({ images: 5 });
-  assert.equal(notifications, 2, "unsubscribed listeners must not fire");
-});
-
-await test("stats are persisted to localStorage", () => {
-  resetStats();
-  recordExtraction({ urls: 4, images: 12 });
-  const stored = JSON.parse(dom.window.localStorage.getItem("wie-stats") ?? "{}");
-  assert.deepEqual(stored, { urls: 4, images: 12, archives: 0 });
-});
-
-await test("corrupt stored data degrades to zeroes instead of throwing", () => {
-  resetStats();
-  recordExtraction({ urls: 9, images: 9 });
-  dom.window.localStorage.setItem("wie-stats", "not json");
-  reloadStats();
-  assert.deepEqual(getStats(), { urls: 0, images: 0, archives: 0 });
-});
-
-await test("reloadStats picks up changes made by another tab", () => {
-  resetStats();
-  dom.window.localStorage.setItem("wie-stats", JSON.stringify({ urls: 7, images: 70, archives: 2 }));
-  reloadStats();
-  assert.deepEqual(getStats(), { urls: 7, images: 70, archives: 2 });
-  resetStats();
-});
-
-console.log("\nSite content");
-
-await test("tips and footer groups are complete", () => {
-  assert.equal(TIPS.length, 5);
-  assert.ok(TIPS.every((tip) => tip.length > 20));
-  assert.ok(FOOTER_GROUPS.length >= 3);
-  for (const group of FOOTER_GROUPS) {
-    assert.ok(group.links.length >= 3, `${group.title} has too few links`);
-    assert.ok(group.links.every((link) => link.href.startsWith("/")));
-  }
-});
-
-await test("FAQ questions are unique", () => {
-  const questions = FAQ_ENTRIES.map((entry) => entry.question);
-  assert.equal(new Set(questions).size, questions.length);
-});
-
-console.log("\nLayout uniformity");
-
 /** Recursively list source files under a directory. */
 function walk(dir: string, extension = ".tsx"): string[] {
   const found: string[] = [];
@@ -264,11 +39,99 @@ function walk(dir: string, extension = ".tsx"): string[] {
 
 const readSource = (path: string) => readFileSync(path, "utf8");
 
+/** Every route that has a page in the app directory. */
+function routeExists(href: string): boolean {
+  const clean = href.split("#")[0]?.split("?")[0] ?? "";
+  if (clean === "/") return existsSync("src/app/page.tsx");
+  return existsSync(`src/app${clean}/page.tsx`);
+}
+
+console.log("\nInternal-tool surface");
+
+await test("no public marketing pages remain", () => {
+  for (const removed of [
+    "pricing",
+    "blog",
+    "contact",
+    "privacy",
+    "terms",
+    "disclaimer",
+    "imprint",
+    "report-issue",
+    "feature-request",
+  ]) {
+    assert.equal(
+      existsSync(`src/app/${removed}`),
+      false,
+      `src/app/${removed} should have been removed for an internal tool`,
+    );
+  }
+});
+
+await test("no marketing modules or ad plumbing remain", () => {
+  for (const file of [
+    "src/components/ad-slot.tsx",
+    "src/components/stats-row.tsx",
+    "src/components/accordion-faq.tsx",
+    "src/components/json-ld.tsx",
+    "src/lib/structured-data.ts",
+    "src/lib/activity-stats.ts",
+    "src/lib/content/blog.ts",
+    "src/lib/content/faq.ts",
+    "src/app/sitemap.ts",
+    "src/app/rss.xml",
+  ]) {
+    assert.equal(existsSync(file), false, `${file} should have been removed`);
+  }
+});
+
+await test("every navigation and footer link resolves to a real route", () => {
+  for (const link of [...NAV_LINKS, ...FOOTER_LINKS]) {
+    assert.ok(routeExists(link.href), `${link.href} (${link.label}) has no page`);
+  }
+});
+
+await test("the app opts out of search indexing", () => {
+  const layout = readSource("src/app/layout.tsx");
+  assert.match(layout, /robots:\s*{\s*index:\s*false/);
+
+  const robots = readSource("src/app/robots.ts");
+  assert.match(robots, /disallow:\s*"\/"/);
+});
+
+await test("no marketing copy is left in the UI", () => {
+  const offenders: string[] = [];
+  for (const file of [...walk("src/app"), ...walk("src/components")]) {
+    const source = readSource(file);
+    for (const phrase of [
+      "100% free",
+      "Free forever",
+      "free forever",
+      "No signup required",
+      "no signup required",
+      "Product Hunt",
+      "Ad Space",
+      "Requires a paid API",
+      "premium tier",
+    ]) {
+      if (source.includes(phrase)) offenders.push(`${file}: ${phrase}`);
+    }
+  }
+  assert.deepEqual(offenders, []);
+});
+
+await test("the site identity describes an internal tool", () => {
+  assert.match(SITE.tagline, /internal/i);
+  assert.ok(!("social" in SITE), "internal tools do not need social links");
+  assert.ok(!("productHunt" in SITE));
+});
+
+console.log("\nLayout uniformity");
+
 await test("no page uses a legacy narrow container width", () => {
   const offenders: string[] = [];
   for (const file of walk("src/app")) {
-    const source = readSource(file);
-    for (const match of source.matchAll(/max-w-(?!\[1600px\]|full)[a-z0-9[\]/.-]+/g)) {
+    for (const match of readSource(file).matchAll(/max-w-(?!\[1600px\]|full)[a-z0-9[\]/.-]+/g)) {
       offenders.push(`${file}: ${match[0]}`);
     }
   }
@@ -282,38 +145,63 @@ await test("shared chrome sits on the same container width", () => {
     "src/components/page-hero.tsx",
     "src/components/extractor/selection-bar.tsx",
   ]) {
-    assert.match(
-      readSource(file),
-      /max-w-\[1600px\]/,
-      `${file} should use the shared container width`,
+    const source = readSource(file);
+    // Either the Container component (single source of truth) or its exact class.
+    assert.ok(
+      source.includes('from "@/components/container"') || source.includes("max-w-[1600px]"),
+      `${file} must use the shared container width`,
     );
   }
 });
 
-await test("ad slots span the full container width", () => {
-  const source = readSource("src/components/ad-slot.tsx");
-  assert.match(source, /w-full min-h-\[120px\]/);
-  assert.ok(!/max-w-\[\d+px\]/.test(source), "ad slots must not be narrower than the container");
-});
-
 await test("content cards share one surface treatment", () => {
-  const page = readSource("src/app/page.tsx");
-  // Every card in the marketing sections is an equal-height flex column.
-  const cards = page.match(/flex h-full flex-col rounded-lg border border-border bg-card/g) ?? [];
-  assert.ok(cards.length >= 4, `expected uniform cards, found ${cards.length}`);
+  const card = readSource("src/components/container.tsx");
+  assert.match(card, /CARD_CLASS/);
+  assert.match(card, /CARD_GRID_CLASS/);
 
-  const blog = readSource("src/app/blog/page.tsx");
-  assert.match(blog, /grid gap-4 sm:grid-cols-2 lg:grid-cols-3/);
+  const feedback = readSource("src/app/feedback/page.tsx");
+  assert.match(feedback, /grid gap-8 lg:grid-cols-2/);
 });
 
 await test("gallery tiles are uniform across breakpoints", () => {
   const source = readSource("src/components/extractor/extractor.tsx");
-  const grid = source.match(/grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5/g) ?? [];
-  assert.ok(grid.length >= 1, "gallery grid should use one consistent definition");
+  assert.match(source, /grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5/);
 
   const card = readSource("src/components/extractor/image-card.tsx");
-  assert.match(card, /aspect-square/, "tiles must share one aspect ratio");
-  assert.match(card, /overflow-hidden whitespace-nowrap/, "tile metadata must stay on one line");
+  assert.match(card, /aspect-square/);
+  assert.match(card, /overflow-hidden whitespace-nowrap/);
+});
+
+console.log("\nDocs and changelog");
+
+await test("documentation covers the operational essentials", () => {
+  const ids = DOC_SECTIONS.map((section) => section.id);
+  assert.equal(new Set(ids).size, ids.length, "section ids must be unique");
+  for (const required of ["getting-started", "api", "self-hosting", "troubleshooting"]) {
+    assert.ok(ids.includes(required), `missing docs section: ${required}`);
+  }
+});
+
+await test("documented API endpoints match the real routes", () => {
+  const apiSection = DOC_SECTIONS.find((section) => section.id === "api");
+  const table = apiSection?.blocks.find((block) => block.type === "table");
+  assert.ok(table && table.type === "table", "the API section needs an endpoint table");
+
+  for (const row of table.rows) {
+    const endpoint = row[0] ?? "";
+    if (!endpoint.startsWith("/api/")) continue;
+    const path = endpoint.replace(/^\/api\//, "");
+    assert.ok(
+      existsSync(`src/app/api/${path}/route.ts`),
+      `documented endpoint ${endpoint} has no route`,
+    );
+  }
+});
+
+await test("the changelog is ordered newest first", () => {
+  const dates = CHANGELOG.map((entry) => entry.date);
+  assert.deepEqual([...dates].sort((a, b) => b.localeCompare(a)), dates);
+  assert.ok(CHANGELOG.every((entry) => entry.items.length > 0));
 });
 
 console.log(
@@ -324,4 +212,3 @@ if (failures.length > 0) {
   for (const failure of failures) console.error(` - ${failure}`);
   process.exit(1);
 }
-

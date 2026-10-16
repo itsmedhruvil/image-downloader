@@ -7,6 +7,18 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "1.3.0",
+    date: "2026-02-25",
+    title: "Stock photo sources and internal-tool cleanup",
+    items: [
+      "New Stock photos tab: search Unsplash, Pexels and Pixabay by keyword, or derive keywords from a page's own sections.",
+      "Stock results use the same gallery, filters and ZIP pipeline; archives that include them ship a credits.txt with the required attribution.",
+      "Removed the public-site surface (pricing, blog, contact, legal pages, ads, marketing sections and FAQ).",
+      "Every page now shares one full-width container and one card size.",
+      "The app is marked noindex and robots.txt disallows crawling.",
+    ],
+  },
+  {
     version: "1.2.0",
     date: "2026-02-18",
     title: "Cloudflare R2 archives and installable PWA",

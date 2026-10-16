@@ -8,7 +8,7 @@ interface PageHeroProps {
   className?: string;
 }
 
-/** Consistent monochrome page header used across the marketing pages. */
+/** Consistent monochrome page header used across the in-app pages. */
 export function PageHero({ eyebrow, title, description, children, className }: PageHeroProps) {
   return (
     <section className={cn("relative overflow-hidden border-b border-border", className)}>
@@ -24,20 +24,5 @@ export function PageHero({ eyebrow, title, description, children, className }: P
         {children ? <div className="mt-8">{children}</div> : null}
       </div>
     </section>
-  );
-}
-
-/** Constrained prose column used by the legal and documentation pages. */
-export function PageBody({
-  children,
-  className,
-}: {
-  children: React.ReactNode;
-  className?: string;
-}) {
-  return (
-    <div className={cn("mx-auto w-full max-w-[1600px] px-4 py-12 sm:px-6 lg:px-8 lg:py-16", className)}>
-      {children}
-    </div>
   );
 }
