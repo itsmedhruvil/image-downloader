@@ -1,80 +1,38 @@
 import Link from "next/link";
 
+import { Container } from "@/components/container";
 import { LogoMark } from "@/components/logo";
-import { FOOTER_GROUPS, SITE } from "@/lib/site";
+import { getStorageMode } from "@/lib/storage-mode";
+import { FOOTER_LINKS, SITE } from "@/lib/site";
 
+/** Deliberately minimal: this is an internal tool, not a public site. */
 export function SiteFooter() {
-  const year = new Date().getFullYear();
+  const storage = getStorageMode();
 
   return (
     <footer className="border-t border-border">
-      <div className="mx-auto w-full max-w-6xl px-4 py-12 sm:px-6">
-        <div className="grid gap-10 md:grid-cols-[1.4fr_repeat(4,1fr)]">
-          <div className="space-y-4">
-            <Link href="/" className="inline-flex items-center gap-2.5">
-              <LogoMark />
-              <span className="text-sm font-bold tracking-tight">{SITE.name}</span>
+      <Container className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3 py-6">
+        <div className="flex items-center gap-2.5 text-xs opacity-70">
+          <LogoMark className="size-5" />
+          <span className="font-semibold">{SITE.name}</span>
+          <span aria-hidden>·</span>
+          <span>internal tool</span>
+          <span aria-hidden>·</span>
+          <span>{storage === "r2" ? "ZIP storage: R2" : "ZIP storage: streamed"}</span>
+        </div>
+
+        <nav aria-label="Footer" className="flex flex-wrap items-center gap-x-5 gap-y-2 text-xs">
+          {FOOTER_LINKS.map((link) => (
+            <Link
+              key={`${link.href}-${link.label}`}
+              href={link.href}
+              className="opacity-70 underline-offset-4 transition-opacity hover:underline hover:opacity-100"
+            >
+              {link.label}
             </Link>
-            <p className="max-w-xs text-sm opacity-70">{SITE.tagline}. Free, private and instant.</p>
-            <p className="text-xs opacity-60">
-              <a className="underline underline-offset-4" href={`mailto:${SITE.email}`}>
-                {SITE.email}
-              </a>
-            </p>
-            <div className="flex flex-wrap gap-3 text-xs font-semibold uppercase tracking-[0.12em]">
-              <a className="underline underline-offset-4" href={SITE.social.x} rel="noreferrer" target="_blank">
-                X
-              </a>
-              <a
-                className="underline underline-offset-4"
-                href={SITE.social.linkedin}
-                rel="noreferrer"
-                target="_blank"
-              >
-                LinkedIn
-              </a>
-              <a
-                className="underline underline-offset-4"
-                href={SITE.social.github}
-                rel="noreferrer"
-                target="_blank"
-              >
-                GitHub
-              </a>
-            </div>
-          </div>
-
-          {FOOTER_GROUPS.map((group) => (
-            <div key={group.title} className="space-y-3">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] opacity-60">
-                {group.title}
-              </p>
-              <ul className="space-y-2">
-                {group.links.map((link) => (
-                  <li key={`${group.title}-${link.href}`}>
-                    <Link href={link.href} className="text-sm opacity-80 hover:opacity-100 hover:underline">
-                      {link.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
           ))}
-        </div>
-
-        <div className="mt-10 flex flex-col gap-3 border-t border-border pt-6 text-xs opacity-70 sm:flex-row sm:items-center sm:justify-between">
-          <p>
-            © {year} {SITE.name}. 100% free &amp; private.
-          </p>
-          <p className="flex flex-wrap items-center gap-x-3 gap-y-1">
-            <span>Built with Next.js on Vercel</span>
-            <span aria-hidden>·</span>
-            <span>Archives on Cloudflare R2</span>
-            <span aria-hidden>·</span>
-            <span>All free tiers</span>
-          </p>
-        </div>
-      </div>
+        </nav>
+      </Container>
     </footer>
   );
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { AlertTriangle, Code2, Image as ImageIcon, Layers, Link2, Loader2, Search, Sparkles, Trash2 } from "lucide-react";
+import { AlertTriangle, Code2, Image as ImageIcon, Layers, Link2, Loader2, Search, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { ImageCard, type Measured } from "@/components/extractor/image-card";
@@ -22,7 +22,6 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { extractImagesFromMarkupClient, extractTitleClient } from "@/lib/extract.client";
-import { recordArchive, recordExtraction } from "@/lib/activity-stats";
 import { FORMAT_LABELS, SOURCE_LABELS } from "@/lib/extract.core";
 import {
   buildClientZip,
@@ -166,7 +165,6 @@ export function Extractor({ storage }: ExtractorProps) {
         } else {
           toast(`${found.length} ${pluralize(found.length, "image")} found.`);
         }
-        recordExtraction({ urls: 1, images: found.length });
         void measureSizes(found);
         return;
       }
@@ -203,7 +201,6 @@ export function Extractor({ storage }: ExtractorProps) {
         toast(`${data.images.length} ${pluralize(data.images.length, "image")} found.`);
       }
 
-      recordExtraction({ urls: data.pagesScanned, images: data.images.length });
       void measureSizes(data.images);
     } catch {
       setError("Something went wrong while extracting. Please try again.");
@@ -295,7 +292,6 @@ export function Extractor({ storage }: ExtractorProps) {
       }
       setMeasured(seeded);
 
-      recordExtraction({ images: found.length });
       void measureSizes(found);
     },
     [measureSizes],
@@ -318,7 +314,6 @@ export function Extractor({ storage }: ExtractorProps) {
           return;
         }
         downloadBlob(result.blob, result.filename);
-        recordArchive();
         toast.success(
           `ZIP ready — ${result.included} ${pluralize(result.included, "image")} converted in your browser.`,
         );
@@ -348,7 +343,6 @@ export function Extractor({ storage }: ExtractorProps) {
       if (contentType.includes("application/json")) {
         const data = (await response.json()) as ZipResponse;
         triggerDownload(data.downloadUrl, data.filename);
-        recordArchive();
         toast.success(
           `ZIP ready — ${formatBytes(data.size)}${data.stored ? ", stored in R2" : ""}.`,
         );
@@ -361,7 +355,6 @@ export function Extractor({ storage }: ExtractorProps) {
       const blob = await response.blob();
       const skipped = Number(response.headers.get("x-archive-skipped") ?? "0");
       downloadBlob(blob, `website-images-${Date.now()}.zip`);
-      recordArchive();
       toast.success(`ZIP ready — ${formatBytes(blob.size)}.`);
       if (skipped > 0) {
         toast.warning(`${skipped} ${pluralize(skipped, "image")} could not be fetched.`);
@@ -406,9 +399,6 @@ export function Extractor({ storage }: ExtractorProps) {
               </TabsTrigger>
               <TabsTrigger value="stock">
                 <ImageIcon className="size-3.5" /> Stock photos
-                <span className="ml-1 rounded-sm bg-foreground px-1 py-px text-[8.5px] font-bold uppercase tracking-[0.08em] text-background">
-                  New
-                </span>
               </TabsTrigger>
             </TabsList>
           </div>
@@ -501,12 +491,10 @@ export function Extractor({ storage }: ExtractorProps) {
         </Tabs>
 
         <p className="mt-5 flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-border pt-4 text-[11px] uppercase tracking-[0.12em] opacity-60">
-          <span className="inline-flex items-center gap-1.5">
-            <Sparkles className="size-3" /> No signup required
-          </span>
-          <span>100% free</span>
+          <span>Server-side fetch</span>
           <span>Nothing is logged</span>
-          <span>{storage === "r2" ? "ZIP via Cloudflare R2" : "ZIP streamed directly"}</span>
+          <span>Limits: 400 images / 30 MB each per ZIP</span>
+          <span>{storage === "r2" ? "Archive storage: R2" : "Archive storage: streamed"}</span>
         </p>
       </div>
 
@@ -545,7 +533,7 @@ export function Extractor({ storage }: ExtractorProps) {
 
 
       {loading ? (
-        <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+        <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
           {Array.from({ length: 8 }).map((_, index) => (
             <div key={index} className="space-y-2 rounded-lg border border-border p-2">
               <Skeleton className="aspect-square w-full" />
@@ -581,7 +569,7 @@ export function Extractor({ storage }: ExtractorProps) {
             </p>
           ) : (
             <>
-              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
                 {filtered.slice(0, 400).map((image, index) => (
                   <ImageCard
                     key={image.url}

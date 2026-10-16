@@ -168,7 +168,7 @@ export const ImageCard = React.memo(function ImageCard({
           <p className="truncate text-xs font-semibold" title={image.credit ?? image.url}>
             {image.name || shortenUrl(image.url)}
           </p>
-          <p className="mt-0.5 flex flex-wrap items-center gap-x-2 text-[10px] uppercase tracking-[0.1em] opacity-60">
+          <p className="mt-0.5 flex items-center gap-x-2 overflow-hidden whitespace-nowrap text-[10px] uppercase tracking-[0.1em] opacity-60">
             <span>{image.provider ?? SOURCE_LABELS[image.source]}</span>
             {dimensions ? <span>{dimensions}</span> : null}
             {measured?.size ? <span>{formatBytes(measured.size)}</span> : null}

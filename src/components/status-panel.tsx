@@ -88,7 +88,7 @@ export function StatusPanel() {
   ];
 
   return (
-    <div className="mx-auto w-full max-w-3xl px-4 py-12 sm:px-6 sm:py-16">
+    <div className="mx-auto w-full max-w-[1600px] px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <p className="text-sm opacity-70">
           {checkedAt ? `Last checked at ${checkedAt}` : "Checking…"}

@@ -241,10 +241,6 @@ const { render, screen, fireEvent, waitFor, cleanup } = await import("@testing-l
 const { Extractor } = await import("../src/components/extractor/extractor");
 const { ThemeToggle, THEME_INIT_SCRIPT } = await import("../src/components/theme-toggle");
 const { TooltipProvider } = await import("../src/components/ui/tooltip");
-const { AdSlot } = await import("../src/components/ad-slot");
-const { AccordionFaq } = await import("../src/components/accordion-faq");
-const { StatsRow } = await import("../src/components/stats-row");
-const { recordExtraction, resetStats } = await import("../src/lib/activity-stats");
 
 /** Mirrors the provider composition from the root layout. */
 function withProviders(node: React.ReactElement) {
@@ -361,7 +357,7 @@ await test("URL mode renders images returned by the API", async () => {
   await screen.findByText("Server image");
   assertText("1 image extracted");
   assertText("Mocked page");
-  assertText("ZIP via Cloudflare R2");
+  assertText("Archive storage: R2");
   cleanup();
 });
 
@@ -428,12 +424,6 @@ await test("theme toggle exposes light, dark and system choices", async () => {
 
 console.log("\nNew UI surfaces");
 
-await test("stock tab carries the New badge", async () => {
-  render(withProviders(React.createElement(Extractor, { storage: "stream" })));
-  const tab = screen.getByRole("tab", { name: /stock photos/i });
-  assert.ok(tab.textContent?.includes("New"), "the newest tab should be badged");
-  cleanup();
-});
 
 await test("image tiles render the transparency preview background", async () => {
   await renderExtractor();
@@ -450,38 +440,8 @@ await test("ZIP button reports how many images are selected", async () => {
   cleanup();
 });
 
-await test("ad slot renders a reserved placeholder when AdSense is unconfigured", () => {
-  render(React.createElement(AdSlot, { size: "leaderboard" }));
-  assert.ok(screen.getByLabelText(/advertisement placeholder/i));
-  assertText("Ad Space · 728 × 90");
-  cleanup();
-});
 
-await test("FAQ accordion reveals rich answers on demand", async () => {
-  render(React.createElement(AccordionFaq, { limit: 2 }));
-  const first = screen.getByRole("button", {
-    name: /is this website image extractor free to use/i,
-  });
-  assert.equal(first.getAttribute("aria-expanded"), "false");
 
-  fireEvent.click(first);
-  await waitFor(() => assert.ok(screen.getByText("No signup required")));
-  assertText("No premium tiers for basic features");
-  cleanup();
-});
-
-await test("stats row reflects locally recorded activity", async () => {
-  resetStats();
-  recordExtraction({ urls: 3, images: 42 });
-  render(React.createElement(StatsRow));
-
-  await waitFor(() => assertText("42"));
-  assertText("URLs extracted");
-  assertText("Images extracted");
-  assertText("Product Hunt");
-  cleanup();
-  resetStats();
-});
 
 console.log("\nStock photo search");
 

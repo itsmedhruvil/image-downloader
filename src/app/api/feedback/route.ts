@@ -6,24 +6,23 @@ import { PutObjectCommand } from "@aws-sdk/client-s3";
 export const runtime = "nodejs";
 export const maxDuration = 30;
 
-interface FeatureRequestBody {
+interface FeedbackBody {
   title?: string;
   email?: string;
   details?: string;
 }
 
 /**
- * POST /api/feature-request — records a product suggestion.
+ * POST /api/feedback — records a bug report or feature request.
  *
- * With R2 configured the request is stored as a small JSON object under
- * `feature-requests/`, which the team can review from the bucket. Without R2 the
- * endpoint reports that storage is unavailable so the UI can offer the mailto
- * fallback instead of silently dropping the message.
+ * With R2 configured the submission is stored as a small JSON object under
+ * `feedback/`, which the team can review from the bucket. Without R2 the
+ * endpoint reports that storage is unavailable rather than silently dropping it.
  */
 export async function POST(request: Request) {
-  let body: FeatureRequestBody;
+  let body: FeedbackBody;
   try {
-    body = (await request.json()) as FeatureRequestBody;
+    body = (await request.json()) as FeedbackBody;
   } catch {
     return NextResponse.json({ error: "Invalid JSON body." }, { status: 400 });
   }
@@ -49,8 +48,7 @@ export async function POST(request: Request) {
     return NextResponse.json(
       {
         error:
-          "Server-side submission is not configured on this deployment. Email your idea to hello@websiteimagextractor.com instead.",
-        fallbackEmail: "hello@websiteimagextractor.com",
+          "Feedback storage is not configured on this deployment (no R2 bucket). Raise it in the team channel instead.",
       },
       { status: 503 },
     );
@@ -65,7 +63,7 @@ export async function POST(request: Request) {
     referer: request.headers.get("referer") ?? null,
   };
 
-  const key = `feature-requests/${Date.now()}-${Math.random().toString(36).slice(2, 10)}.json`;
+  const key = `feedback/${Date.now()}-${Math.random().toString(36).slice(2, 10)}.json`;
 
   try {
     await getR2Client().send(

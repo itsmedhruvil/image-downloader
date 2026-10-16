@@ -27,7 +27,7 @@ export default function ChangelogPage() {
         </Badge>
       </PageHero>
 
-      <section className="mx-auto w-full max-w-3xl px-4 py-12 sm:px-6 sm:py-16">
+      <section className="mx-auto w-full max-w-[1600px] px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
         <ol className="space-y-10 border-l border-border pl-6">
           {CHANGELOG.map((entry) => (
             <li key={entry.version} className="relative">

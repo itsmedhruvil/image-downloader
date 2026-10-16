@@ -259,6 +259,35 @@
 .prose-mono {
   line-height: 1.75;
 }
+
+/*
+ * At the container's full width a single prose column would run ~1600px wide,
+ * which is unreadable. Splitting into balanced columns keeps the page genuinely
+ * full-width while holding the measure at a comfortable length.
+ */
+.prose-columns {
+  columns: 1;
+}
+@media (min-width: 1024px) {
+  .prose-columns {
+    columns: 2;
+    column-gap: 3.5rem;
+  }
+}
+.prose-columns h2,
+.prose-columns h3 {
+  break-after: avoid;
+}
+.prose-columns p,
+.prose-columns li,
+.prose-columns pre,
+.prose-columns blockquote,
+.prose-columns table {
+  break-inside: avoid;
+}
+.prose-columns > *:first-child {
+  margin-top: 0;
+}
 .prose-mono h2 {
   font-size: 1.5rem;
   font-weight: 700;

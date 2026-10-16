@@ -47,7 +47,7 @@ export function SelectionBar({
 
   return (
     <div className="sticky bottom-0 z-40 border-t border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/85">
-      <div className="mx-auto flex w-full max-w-6xl flex-col gap-3 px-4 py-3 sm:px-6 lg:flex-row lg:items-center lg:justify-between">
+      <div className="mx-auto flex w-full max-w-[1600px] flex-col gap-3 px-4 py-3 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8">
         <div className="flex flex-wrap items-center gap-3">
           <p className="text-xs font-semibold uppercase tracking-[0.14em]">
             {selectedCount} selected
@@ -106,7 +106,7 @@ export function SelectionBar({
         </div>
       </div>
 
-      <p className="mx-auto w-full max-w-6xl px-4 pb-3 text-[11px] uppercase tracking-[0.12em] opacity-50 sm:px-6">
+      <p className="mx-auto w-full max-w-[1600px] px-4 pb-3 text-[11px] uppercase tracking-[0.12em] opacity-50 sm:px-6 lg:px-8">
         {storage === "r2"
           ? "Archives are stored briefly in Cloudflare R2 and expire automatically."
           : "Archives are streamed straight to you — nothing is stored."}
