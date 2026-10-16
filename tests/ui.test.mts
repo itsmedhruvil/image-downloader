@@ -172,6 +172,45 @@ globals.fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
       skipped: [],
     });
   }
+  if (url.includes("/api/providers")) {
+    return jsonResponse({ unsplash: true, pexels: false, pixabay: false });
+  }
+  if (url.includes("/api/stock/search")) {
+    return jsonResponse({
+      results: [
+        {
+          name: "cats",
+          keyword: "cats",
+          images: [
+            {
+              id: "unsplash-1",
+              provider: "unsplash",
+              url: "https://images.unsplash.com/photo-1.jpg",
+              previewUrl: "https://images.unsplash.com/photo-1.jpg?w=400",
+              filename: "unsplash-1.jpg",
+              width: 4000,
+              height: 3000,
+              credit: "Photo by Jane Doe on Unsplash — https://unsplash.com/photos/1",
+              attributionUrl: "https://unsplash.com/photos/1",
+            },
+          ],
+        },
+      ],
+      usedProviders: ["unsplash"],
+      warnings: [],
+      durationMs: 42,
+    });
+  }
+  if (url.includes("/api/analyze-url")) {
+    return jsonResponse({
+      url: "https://example.com/",
+      title: "Mocked page",
+      sections: [
+        { name: "Mountain hiking", suggestedKeyword: "mountain hiking", allSuggestions: ["mountain hiking", "ridges"] },
+      ],
+      durationMs: 10,
+    });
+  }
   if (url.includes("/api/extract")) {
     return jsonResponse({
       images: [
@@ -389,10 +428,10 @@ await test("theme toggle exposes light, dark and system choices", async () => {
 
 console.log("\nNew UI surfaces");
 
-await test("bulk tab carries the New badge", async () => {
+await test("stock tab carries the New badge", async () => {
   render(withProviders(React.createElement(Extractor, { storage: "stream" })));
-  const tab = screen.getByRole("tab", { name: /bulk urls/i });
-  assert.ok(tab.textContent?.includes("New"), "bulk tab should be badged as new");
+  const tab = screen.getByRole("tab", { name: /stock photos/i });
+  assert.ok(tab.textContent?.includes("New"), "the newest tab should be badged");
   cleanup();
 });
 
@@ -442,6 +481,91 @@ await test("stats row reflects locally recorded activity", async () => {
   assertText("Product Hunt");
   cleanup();
   resetStats();
+});
+
+console.log("\nStock photo search");
+
+async function openStockTab() {
+  render(withProviders(React.createElement(Extractor, { storage: "stream" })));
+  activateTab(/stock photos/i);
+  await screen.findByRole("button", { name: /search images/i });
+}
+
+await test("stock tab exposes keyword search, orientation and sources", async () => {
+  await openStockTab();
+  assertText("By keywords");
+  assertText("By website URL");
+  assert.ok(screen.getByLabelText("Keyword 1"));
+  assert.ok(screen.getByLabelText("Images for keyword 1"));
+  assertText("Image sources");
+  assertText("Orientation");
+  cleanup();
+});
+
+await test("providers without an API key are disabled", async () => {
+  await openStockTab();
+  await waitFor(() => assertText("1 source active"));
+
+  const pexels = screen.getByRole("button", { name: /pexels/i });
+  assert.equal(pexels.hasAttribute("disabled"), true, "unconfigured provider must be disabled");
+  assertText("no key");
+
+  const unsplash = screen.getByRole("button", { name: /unsplash/i });
+  assert.equal(unsplash.hasAttribute("disabled"), false);
+  cleanup();
+});
+
+await test("searching posts the keywords, providers and orientation", async () => {
+  await openStockTab();
+  fetchCalls.length = 0;
+
+  fireEvent.change(screen.getByLabelText("Keyword 1"), { target: { value: "mountain landscape" } });
+  await waitFor(() => assertText("1 keyword ready"));
+
+  fireEvent.click(screen.getByRole("button", { name: /search images/i }));
+
+  await waitFor(() => {
+    const call = fetchCalls.find((entry) => entry.url.includes("/api/stock/search"));
+    assert.ok(call, "expected a stock search request");
+    const body = call.body as {
+      providers: string[];
+      orientation: string | null;
+      groups: { name: string; keyword: string; count: number }[];
+    };
+    assert.deepEqual(body.providers, ["unsplash"]);
+    assert.equal(body.orientation, null);
+    assert.deepEqual(body.groups, [
+      { name: "mountain landscape", keyword: "mountain landscape", count: 12 },
+    ]);
+  });
+  cleanup();
+});
+
+await test("stock results land in the shared gallery with provider metadata", async () => {
+  await openStockTab();
+  fireEvent.change(screen.getByLabelText("Keyword 1"), { target: { value: "cats" } });
+  fireEvent.click(screen.getByRole("button", { name: /search images/i }));
+
+  await screen.findByText("unsplash-1.jpg");
+  assertText("1 image extracted");
+  // Provider replaces the generic source label, and dimensions come from the API.
+  assertText("unsplash");
+  assertText("4000 × 3000");
+  cleanup();
+});
+
+await test("website analysis turns page sections into editable keywords", async () => {
+  await openStockTab();
+  fireEvent.click(screen.getByRole("button", { name: /by website url/i }));
+  const urlInput = await screen.findByLabelText(/website url to analyze/i);
+  fireEvent.change(urlInput, { target: { value: "example.com" } });
+  fireEvent.click(screen.getByRole("button", { name: /suggest keywords/i }));
+
+  await waitFor(() => {
+    const keyword = screen.getByLabelText("Keyword 1") as HTMLInputElement;
+    assert.equal(keyword.value, "mountain hiking");
+  });
+  cleanup();
 });
 
 console.log(

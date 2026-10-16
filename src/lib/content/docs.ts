@@ -235,6 +235,9 @@ export const DOC_SECTIONS: DocSection[] = [
           ["FETCH_USER_AGENT", "No", "Override the outbound user agent."],
           ["NEXT_PUBLIC_ADSENSE_CLIENT", "No", "AdSense publisher id; unset renders placeholders."],
           ["NEXT_PUBLIC_ADSENSE_SLOT", "No", "Default AdSense ad-unit slot id."],
+          ["UNSPLASH_ACCESS_KEY", "No", "Unsplash access key for stock photo search."],
+          ["PEXELS_API_KEY", "No", "Pexels API key for stock photo search."],
+          ["PIXABAY_API_KEY", "No", "Pixabay API key for stock photo search."],
         ],
       },
       {

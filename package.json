@@ -10,9 +10,10 @@
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
     "typecheck:tests": "tsc --noEmit -p tests/tsconfig.json",
-    "test": "tsx --tsconfig tests/tsconfig.json tests/extract.test.mts && tsx --tsconfig tests/tsconfig.json tests/content.test.mts && tsx --tsconfig tests/tsconfig.json tests/r2.test.mts && tsx --tsconfig tests/tsconfig.json tests/ui.test.mts",
+    "test": "tsx --tsconfig tests/tsconfig.json tests/extract.test.mts && tsx --tsconfig tests/tsconfig.json tests/content.test.mts && tsx --tsconfig tests/tsconfig.json tests/stock.test.mts && tsx --tsconfig tests/tsconfig.json tests/r2.test.mts && tsx --tsconfig tests/tsconfig.json tests/ui.test.mts",
     "test:extract": "tsx --tsconfig tests/tsconfig.json tests/extract.test.mts",
     "test:content": "tsx --tsconfig tests/tsconfig.json tests/content.test.mts",
+    "test:stock": "tsx --tsconfig tests/tsconfig.json tests/stock.test.mts",
     "test:r2": "tsx --tsconfig tests/tsconfig.json tests/r2.test.mts",
     "test:ui": "tsx --tsconfig tests/tsconfig.json tests/ui.test.mts",
     "icons": "python3 scripts/generate_icons.py"

@@ -396,5 +396,6 @@ export const SOURCE_LABELS: Record<ImageSource, string> = {
   meta: "meta tag",
   link: "link rel",
   "video-poster": "video poster",
+  stock: "stock photo",
 };
 

@@ -28,6 +28,11 @@ ZIP archive storage, and installable as a **PWA**.
   leaves the device; archives expire automatically.
 - **PWA** — web manifest, installable, service worker with an offline shell and a
   stale-while-revalidate image cache.
+- **Multi-source stock search** — the fourth tab searches **Unsplash, Pexels and Pixabay** by keyword
+  (or by website URL, where the page's own headings and copy become suggested keywords). Results
+  drop into the same gallery, so the filters, format conversion and R2 ZIP pipeline all apply. Each
+  provider is key-gated: without a key it is shown as inactive. Stock images carry the attribution
+  their API terms require, and every ZIP that contains one includes a `credits.txt`.
 - **Monetisation-ready ad slots** — dashboard ad placeholders by default; set
   `NEXT_PUBLIC_ADSENSE_CLIENT`/`NEXT_PUBLIC_ADSENSE_SLOT` to swap in real AdSense units that load
   after idle.
@@ -96,6 +101,9 @@ directly. Its free tier includes 10 GB of storage and generous Class A/B operati
 | `FETCH_USER_AGENT` | No | Override the outbound user agent |
 | `NEXT_PUBLIC_ADSENSE_CLIENT` | No | AdSense publisher id; unset renders monochrome ad placeholders |
 | `NEXT_PUBLIC_ADSENSE_SLOT` | No | Default AdSense ad-unit slot id |
+| `UNSPLASH_ACCESS_KEY` | No | Unsplash access key for stock photo search |
+| `PEXELS_API_KEY` | No | Pexels API key for stock photo search |
+| `PIXABAY_API_KEY` | No | Pixabay API key for stock photo search |
 
 The `/status` page reports which backend is active.
 
@@ -112,6 +120,9 @@ src/
       extract/route.ts           # scan a URL, a batch of URLs, or pasted markup
       proxy/route.ts             # stream images (hotlink-safe) + ?meta=1 size probe
       zip/route.ts               # build a ZIP, store in R2 or stream it back
+      providers/route.ts         # which stock sources have API keys configured
+      stock/search/route.ts      # multi-source stock photo search
+      analyze-url/route.ts       # suggest keywords from a page's structure
       download/[...key]/route.ts # stream a stored archive from R2
       feature-request/route.ts   # record suggestions in R2
       health/route.ts            # readiness probe for the status page
@@ -132,6 +143,10 @@ src/
     zip.ts                       # server ZIP builder with limits
     r2.ts                        # Cloudflare R2 (S3 API) wrapper
     net.ts                       # SSRF guard + page fetcher
+    stock/providers.ts           # Unsplash / Pexels / Pixabay clients + normalisers
+    stock/search.ts              # bounded provider fan-out
+    stock/keywords.ts            # heading-aware keyword derivation
+    credits.ts                   # attribution file shared by both ZIP paths
     download.ts                  # client download/convert helpers
 public/
   sw.js manifest.webmanifest offline.html icons
@@ -175,8 +190,9 @@ npm run test:ui       # React extractor flow in jsdom (gallery, filters, selecti
 | --- | --- |
 | `extract` | Format detection, srcset/CSS parsing, entity decoding, false-positive filters, both collectors, filename generation, ZIP packaging and failure handling |
 | `content` | JSON-LD schema shapes, FAQ → FAQPage generation, blog post schema, RSS well-formedness, activity-stat store semantics and persistence |
+| `stock` | Provider payload normalisation (including malformed input), orientation translation, square fallback, fan-out limits and key gating, keyword derivation, and `credits.txt` generation |
 | `r2` | `isR2Configured`, key generation, TTL parsing, PUT/GET/DELETE against an S3-compatible mock, bucket scoping |
-| `ui` | Tab switching, HTML-mode extraction, gallery rendering, format filters, select-all, ZIP request payload, selection reset, preview dialog, clipboard copy, ad-slot placeholder, FAQ accordion, stats row, theme bootstrap and theme menu |
+| `ui` | Tab switching, HTML/URL/stock modes, gallery rendering, format filters, select-all, ZIP request payload, preview dialog, ad slot, FAQ accordion, stats row and theme handling |
 
 `npm run typecheck` checks the app; `npm run typecheck:tests` checks the test sources.
 

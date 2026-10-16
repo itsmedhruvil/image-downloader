@@ -1,3 +1,5 @@
+import type { StockProvider } from "./stock/types";
+
 /** Every image format the extractor can recognise. */
 export type ImageFormat =
   | "jpg"
@@ -21,7 +23,8 @@ export type ImageSource =
   | "inline-svg"
   | "meta"
   | "link"
-  | "video-poster";
+  | "video-poster"
+  | "stock";
 
 /** A single extracted image reference. */
 export interface ExtractedImage {
@@ -35,9 +38,20 @@ export interface ExtractedImage {
   source: ImageSource;
   /** True when the image lives on a different origin than the page. */
   crossOrigin: boolean;
+  /** Present for multi-source stock search results. */
+  provider?: StockProvider;
+  /** Smaller variant of the same image, used for gallery tiles. */
+  previewUrl?: string;
+  /** Attribution line required by the provider's API terms. */
+  credit?: string;
+  /** Page the image belongs to, for attribution links. */
+  attributionUrl?: string;
+  /** Dimensions reported by the provider API (avoids measuring them). */
+  width?: number;
+  height?: number;
 }
 
-export type ExtractMethod = "url" | "html" | "bulk";
+export type ExtractMethod = "url" | "html" | "bulk" | "stock";
 
 export interface ExtractRequest {
   method: ExtractMethod;
@@ -80,6 +94,8 @@ export interface ZipResponse {
   expiresAt: string | null;
   /** Images that could not be fetched and were skipped. */
   skipped: string[];
+  /** How many included images carried an attribution line (credits.txt written). */
+  credited?: number;
 }
 
 export interface FeatureRequestPayload {
