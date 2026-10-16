@@ -175,6 +175,24 @@ scripts/generate_icons.py        # regenerates the monochrome PWA icons
 | Max page size scanned | 8 MB |
 | Bulk URLs per request | 5 |
 
+## Layout conventions
+
+The whole app shares **one** container width so nothing drifts out of alignment:
+
+- `CONTAINER_CLASS` in `src/components/container.tsx` is the single source of truth
+  (`mx-auto w-full max-w-[1600px] px-4 sm:px-6 lg:px-8`). The header, footer, selection bar, page
+  heroes, every section and every page use exactly this width.
+- `SECTION_PADDING` (`py-12 lg:py-16`) gives every section the same vertical rhythm.
+- `CARD_CLASS` / `CARD_GRID_CLASS` make content cards equal-height flex columns on a single gap
+  (`gap-4`), so a row of cards is always the same size regardless of how much copy each holds.
+- Ad slots span the full container width at a fixed height instead of a hard-coded 728×90 box.
+- Long-form prose (legal pages, blog posts, docs) fills the full width using balanced CSS columns
+  (`.prose-columns`) rather than a narrow centred column.
+
+`tests/content.test.mts` enforces all of this: it fails if any page file reintroduces a legacy
+narrow width, if the shared chrome stops using the container, or if the card/gallery definitions
+diverge.
+
 ## Testing
 
 Three suites run without a browser or network access, using `tsx` + `jsdom`:
