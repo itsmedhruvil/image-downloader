@@ -2,9 +2,15 @@ import type { ContentBlock } from "@/lib/content/blog";
 import { cn } from "@/lib/utils";
 
 /** Renders the structured content blocks used by blog posts and docs. */
-export function ContentBlocks({ blocks }: { blocks: ContentBlock[] }) {
+export function ContentBlocks({
+  blocks,
+  className,
+}: {
+  blocks: ContentBlock[];
+  className?: string;
+}) {
   return (
-    <div className="prose-mono">
+    <div className={cn("prose-mono", className)}>
       {blocks.map((block, index) => {
         switch (block.type) {
           case "h2":

@@ -25,7 +25,7 @@ export default function BlogIndexPage() {
       />
 
       <section className="border-b border-border">
-        <div className="mx-auto w-full max-w-6xl px-4 py-12 sm:px-6 sm:py-16">
+        <div className="mx-auto w-full max-w-[1600px] px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
           {featured ? (
             <Link
               href={`/blog/${featured.slug}`}
@@ -37,7 +37,7 @@ export default function BlogIndexPage() {
               <h2 className="mt-3 text-2xl font-bold leading-snug tracking-tight group-hover:underline sm:text-3xl">
                 {featured.title}
               </h2>
-              <p className="mt-3 max-w-2xl text-sm leading-relaxed opacity-75">
+              <p className="mt-3 text-sm leading-relaxed opacity-75">
                 {featured.description}
               </p>
               <span className="mt-5 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.12em]">
@@ -46,7 +46,7 @@ export default function BlogIndexPage() {
             </Link>
           ) : null}
 
-          <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {rest.map((post) => (
               <Link
                 key={post.slug}
@@ -67,7 +67,7 @@ export default function BlogIndexPage() {
         </div>
       </section>
       <section className="border-b border-border">
-        <div className="mx-auto w-full max-w-[728px] px-4 py-10 sm:px-6">
+        <div className="mx-auto w-full max-w-[1600px] px-4 py-10 sm:px-6 lg:px-8">
           <AdSlot size="leaderboard" />
         </div>
       </section>

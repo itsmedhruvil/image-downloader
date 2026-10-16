@@ -21,7 +21,7 @@ export default function TermsPage() {
       />
 
       <PageBody>
-        <div className="prose-mono">
+        <div className="prose-mono prose-columns">
           <h2>1. Acceptance</h2>
           <p>
             By using {SITE.name} you agree to these terms. If you do not agree, please do not use the

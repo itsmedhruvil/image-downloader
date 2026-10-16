@@ -84,7 +84,7 @@ export default function PricingPage() {
       </PageHero>
 
       <section className="border-b border-border">
-        <div className="mx-auto grid w-full max-w-6xl gap-6 px-4 py-14 sm:px-6 lg:grid-cols-2 lg:py-20">
+        <div className="mx-auto grid w-full max-w-[1600px] gap-4 px-4 py-12 sm:px-6 lg:grid-cols-2 lg:px-8 lg:py-16">
           {TIERS.map((tier) => (
             <article
               key={tier.name}
@@ -123,7 +123,7 @@ export default function PricingPage() {
       </section>
 
       <section className="border-b border-border">
-        <div className="mx-auto w-full max-w-4xl px-4 py-14 sm:px-6 lg:py-20">
+        <div className="mx-auto w-full max-w-[1600px] px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
           <h2 className="text-2xl font-bold tracking-tight sm:text-3xl">What is included</h2>
           <div className="mt-8 overflow-x-auto rounded-lg border border-border">
             <table className="w-full min-w-[28rem] border-collapse text-sm">
@@ -179,7 +179,7 @@ export default function PricingPage() {
       </section>
 
       <section>
-        <div className="mx-auto w-full max-w-3xl px-4 py-14 sm:px-6 lg:py-20">
+        <div className="mx-auto w-full max-w-[1600px] px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
           <h2 className="text-2xl font-bold tracking-tight sm:text-3xl">Common questions</h2>
           <AccordionFaq limit={5} />
           <p className="mt-8 text-xs uppercase tracking-[0.14em] opacity-50">

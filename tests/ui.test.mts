@@ -453,7 +453,7 @@ await test("ZIP button reports how many images are selected", async () => {
 await test("ad slot renders a reserved placeholder when AdSense is unconfigured", () => {
   render(React.createElement(AdSlot, { size: "leaderboard" }));
   assert.ok(screen.getByLabelText(/advertisement placeholder/i));
-  assertText("Ad Space · 728 × 90");
+  assertText("Ad Space · full width");
   cleanup();
 });
 

@@ -59,7 +59,7 @@ export default function ReportIssuePage() {
         </div>
       </PageHero>
 
-      <div className="mx-auto grid w-full max-w-6xl gap-10 px-4 py-12 sm:px-6 sm:py-16 lg:grid-cols-2">
+      <div className="mx-auto grid w-full max-w-[1600px] gap-8 px-4 py-12 sm:px-6 lg:px-8 lg:py-16 lg:grid-cols-2">
         <section className="rounded-lg border border-border p-6">
           <h2 className="text-sm font-bold uppercase tracking-[0.12em]">What to include</h2>
           <ul className="mt-4 space-y-3 text-sm opacity-80">

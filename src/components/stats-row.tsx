@@ -38,7 +38,7 @@ export function StatsRow({ className }: { className?: string }) {
   ];
 
   return (
-    <div className={cn("grid gap-3 sm:grid-cols-3", className)}>
+    <div className={cn("grid gap-4 sm:grid-cols-3", className)}>
       {items.map((item) => (
         <div
           key={item.label}

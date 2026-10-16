@@ -38,8 +38,8 @@ export default function ContactPage() {
         description="There is no support portal to sign into and no ticket number to remember. Email works."
       />
 
-      <div className="mx-auto w-full max-w-6xl px-4 py-12 sm:px-6 sm:py-16">
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="mx-auto w-full max-w-[1600px] px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {CHANNELS.map((channel) => (
             <article key={channel.title} className="rounded-lg border border-border p-6">
               <h2 className="text-sm font-bold uppercase tracking-[0.12em]">{channel.title}</h2>
@@ -54,7 +54,7 @@ export default function ContactPage() {
           ))}
         </div>
 
-        <div className="mt-10 grid gap-6 lg:grid-cols-2">
+        <div className="mt-10 grid gap-8 lg:grid-cols-2">
           <div className="rounded-lg border border-border p-6">
             <h2 className="text-sm font-bold uppercase tracking-[0.12em]">Before you write</h2>
             <ul className="mt-4 space-y-2 text-sm opacity-80">

@@ -21,7 +21,7 @@ export default function ImprintPage() {
       />
 
       <PageBody>
-        <div className="prose-mono">
+        <div className="prose-mono prose-columns">
           <h2>Provider</h2>
           <p>
             {SITE.name} is an independently operated, free web utility. It is not a registered

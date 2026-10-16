@@ -91,15 +91,15 @@ export default function HomePage() {
       {/* HERO */}
       <section className="relative overflow-hidden border-b border-border">
         <div className="grid-paper pointer-events-none absolute inset-0" aria-hidden />
-        <div className="relative mx-auto w-full max-w-6xl px-4 pb-10 pt-12 sm:px-6 sm:pt-16">
-          <div className="mx-auto max-w-3xl text-center">
+        <div className="relative mx-auto w-full max-w-[1600px] px-4 pb-10 pt-12 sm:px-6 sm:pt-16 lg:px-8">
+          <div className="mx-auto text-center">
             <Badge variant="outline" className="mb-5">
               <Sparkles className="size-3" /> 100% free &amp; private
             </Badge>
             <h1 className="text-balance text-4xl font-bold leading-[1.05] tracking-tight sm:text-5xl md:text-6xl">
               Extract images from any website
             </h1>
-            <p className="mx-auto mt-5 max-w-2xl text-balance text-base opacity-75 sm:text-lg">
+            <p className="mx-auto mt-5 text-balance text-base opacity-75 sm:text-lg">
               Paste a URL or HTML, preview every image on the page, filter by format, dimensions and
               file size, then download what you need — one by one or as a single ZIP.
             </p>
@@ -109,17 +109,17 @@ export default function HomePage() {
             <Extractor storage={storage} />
           </div>
 
-          <StatsRow className="mt-4 max-w-[960px] sm:mx-auto" />
+          <StatsRow className="mt-4" />
 
-          <div className="mt-4 max-w-[960px] rounded-lg border border-border bg-card p-5 sm:mx-auto sm:p-6">
+          <div className="mt-4 rounded-lg border border-border bg-card p-5 sm:p-6">
             <p className="mb-4 text-[10px] font-semibold uppercase tracking-[0.18em] opacity-60">
               Tips
             </p>
-            <ul className="grid list-none gap-3.5 p-0 sm:grid-cols-2 lg:grid-cols-5">
+            <ul className="grid list-none gap-4 p-0 sm:grid-cols-2 lg:grid-cols-5">
               {TIPS.map((tip) => (
                 <li
                   key={tip}
-                  className="relative border-t border-border pt-3 text-[13px] leading-relaxed opacity-75"
+                  className="relative flex h-full flex-col border-t border-border pt-3 text-[13px] leading-relaxed opacity-75"
                 >
                   <span
                     className="absolute -top-px left-0 h-[2px] w-[22px] bg-foreground"
@@ -131,14 +131,14 @@ export default function HomePage() {
             </ul>
           </div>
 
-          <div className="mt-6 max-w-[728px] sm:mx-auto">
+          <div className="mt-6">
             <AdSlot size="leaderboard" />
           </div>
         </div>
       </section>
 
       <section className="border-b border-border">
-        <div className="mx-auto grid w-full max-w-6xl gap-10 px-4 py-14 sm:px-6 lg:grid-cols-[1fr_1.1fr] lg:py-20">
+        <div className="mx-auto grid w-full max-w-[1600px] gap-8 px-4 py-12 sm:px-6 lg:grid-cols-2 lg:px-8 lg:py-16">
           <div>
             <p className="text-[11px] font-semibold uppercase tracking-[0.2em] opacity-60">
               01 — Definition
@@ -173,17 +173,17 @@ export default function HomePage() {
       </section>
 
       <section className="border-b border-border">
-        <div className="mx-auto w-full max-w-6xl px-4 py-14 sm:px-6 lg:py-20">
+        <div className="mx-auto w-full max-w-[1600px] px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
           <p className="text-[11px] font-semibold uppercase tracking-[0.2em] opacity-60">
             02 — Three methods
           </p>
-          <h2 className="mt-4 max-w-2xl text-3xl font-bold tracking-tight sm:text-4xl">
+          <h2 className="mt-4 text-3xl font-bold tracking-tight sm:text-4xl">
             How to download all images from a website in 3 steps
           </h2>
 
-          <div className="mt-10 grid gap-6 md:grid-cols-3">
+          <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {STEPS.map((step, index) => (
-              <article key={step.title} className="rounded-lg border border-border p-6">
+              <article key={step.title} className="flex h-full flex-col rounded-lg border border-border bg-card p-6">
                 <div className="flex items-center justify-between">
                   <span className="flex size-9 items-center justify-center rounded-md border border-border">
                     <step.icon className="size-4" />
@@ -201,7 +201,7 @@ export default function HomePage() {
       </section>
 
       <section className="border-b border-border">
-        <div className="mx-auto grid w-full max-w-6xl gap-10 px-4 py-14 sm:px-6 lg:grid-cols-2 lg:py-20">
+        <div className="mx-auto grid w-full max-w-[1600px] gap-8 px-4 py-12 sm:px-6 lg:grid-cols-2 lg:px-8 lg:py-16">
           <div>
             <p className="text-[11px] font-semibold uppercase tracking-[0.2em] opacity-60">
               03 — Filters
@@ -210,7 +210,7 @@ export default function HomePage() {
               Advanced image filters — PNG, JPG, SVG, WebP &amp; more
             </h2>
             <div className="mt-8 space-y-5">
-              <div className="flex gap-4 rounded-lg border border-border p-5">
+              <div className="flex h-full gap-4 rounded-lg border border-border bg-card p-5">
                 <Filter className="mt-0.5 size-5 shrink-0" />
                 <div>
                   <h3 className="text-sm font-bold uppercase tracking-[0.1em]">Filter by format</h3>
@@ -220,7 +220,7 @@ export default function HomePage() {
                   </p>
                 </div>
               </div>
-              <div className="flex gap-4 rounded-lg border border-border p-5">
+              <div className="flex h-full gap-4 rounded-lg border border-border bg-card p-5">
                 <Gauge className="mt-0.5 size-5 shrink-0" />
                 <div>
                   <h3 className="text-sm font-bold uppercase tracking-[0.1em]">
@@ -232,7 +232,7 @@ export default function HomePage() {
                   </p>
                 </div>
               </div>
-              <div className="flex gap-4 rounded-lg border border-border p-5">
+              <div className="flex h-full gap-4 rounded-lg border border-border bg-card p-5">
                 <Wand2 className="mt-0.5 size-5 shrink-0" />
                 <div>
                   <h3 className="text-sm font-bold uppercase tracking-[0.1em]">
@@ -292,17 +292,17 @@ export default function HomePage() {
       </section>
 
       <section className="border-b border-border">
-        <div className="mx-auto w-full max-w-6xl px-4 py-14 sm:px-6 lg:py-20">
+        <div className="mx-auto w-full max-w-[1600px] px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
           <p className="text-[11px] font-semibold uppercase tracking-[0.2em] opacity-60">
             04 — Who uses it
           </p>
-          <h2 className="mt-4 max-w-2xl text-3xl font-bold tracking-tight sm:text-4xl">
+          <h2 className="mt-4 text-3xl font-bold tracking-tight sm:text-4xl">
             Why designers, developers &amp; marketers use it
           </h2>
 
-          <div className="mt-10 grid gap-6 sm:grid-cols-2">
+          <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {AUDIENCES.map((audience) => (
-              <article key={audience.title} className="rounded-lg border border-border p-6">
+              <article key={audience.title} className="flex h-full flex-col rounded-lg border border-border bg-card p-6">
                 <h3 className="text-lg font-bold tracking-tight">{audience.title}</h3>
                 <p className="mt-2 text-sm leading-relaxed opacity-75">{audience.body}</p>
               </article>
@@ -312,17 +312,17 @@ export default function HomePage() {
       </section>
 
       <section className="border-b border-border">
-        <div className="mx-auto w-full max-w-6xl px-4 py-14 sm:px-6 lg:py-20">
+        <div className="mx-auto w-full max-w-[1600px] px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
           <p className="text-[11px] font-semibold uppercase tracking-[0.2em] opacity-60">
             05 — What powers it
           </p>
-          <h2 className="mt-4 max-w-2xl text-3xl font-bold tracking-tight sm:text-4xl">
+          <h2 className="mt-4 text-3xl font-bold tracking-tight sm:text-4xl">
             100% private, secure &amp; always free
           </h2>
 
-          <div className="mt-10 grid gap-px overflow-hidden rounded-lg border border-border bg-border sm:grid-cols-2 lg:grid-cols-3">
+          <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {FEATURES.map((feature) => (
-              <div key={feature.title} className="bg-background p-6">
+              <div key={feature.title} className="flex h-full flex-col rounded-lg border border-border bg-card p-6">
                 <h3 className="text-sm font-bold uppercase tracking-[0.1em]">{feature.title}</h3>
                 <p className="mt-2 text-sm leading-relaxed opacity-75">{feature.body}</p>
               </div>
@@ -346,11 +346,11 @@ export default function HomePage() {
 
 
       <section className="border-b border-border">
-        <div className="mx-auto w-full max-w-6xl px-4 py-14 sm:px-6 lg:py-20">
+        <div className="mx-auto w-full max-w-[1600px] px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
           <p className="text-[11px] font-semibold uppercase tracking-[0.2em] opacity-60">
             06 — Answers
           </p>
-          <h2 className="mt-4 max-w-2xl text-3xl font-bold tracking-tight sm:text-4xl">
+          <h2 className="mt-4 text-3xl font-bold tracking-tight sm:text-4xl">
             Frequently asked questions
           </h2>
 
@@ -371,7 +371,7 @@ export default function HomePage() {
       </section>
 
       <section className="border-b border-border">
-        <div className="mx-auto w-full max-w-6xl px-4 py-14 sm:px-6 lg:py-20">
+        <div className="mx-auto w-full max-w-[1600px] px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
               <p className="text-[11px] font-semibold uppercase tracking-[0.2em] opacity-60">
@@ -388,12 +388,12 @@ export default function HomePage() {
             </Button>
           </div>
 
-          <div className="mt-10 grid gap-6 md:grid-cols-3">
+          <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {BLOG_POSTS.slice(0, 3).map((post) => (
               <Link
                 key={post.slug}
                 href={`/blog/${post.slug}`}
-                className="group flex flex-col rounded-lg border border-border p-6 transition-colors hover:border-primary"
+                className="group flex h-full flex-col rounded-lg border border-border bg-card p-6 transition-colors hover:border-primary"
               >
                 <span className="text-[10px] font-semibold uppercase tracking-[0.16em] opacity-60">
                   {post.tag} · {post.readingMinutes} min read
@@ -410,17 +410,17 @@ export default function HomePage() {
       </section>
 
       <section className="border-b border-border">
-        <div className="mx-auto w-full max-w-[728px] px-4 py-10 sm:px-6">
+        <div className="mx-auto w-full max-w-[1600px] px-4 py-10 sm:px-6 lg:px-8">
           <AdSlot size="leaderboard" />
         </div>
       </section>
 
       <section>
-        <div className="mx-auto w-full max-w-6xl px-4 py-16 text-center sm:px-6 lg:py-24">
+        <div className="mx-auto w-full max-w-[1600px] px-4 py-16 sm:px-6 lg:px-8 lg:py-20">
           <h2 className="text-balance text-3xl font-bold tracking-tight sm:text-4xl">
             Grab every image from any page
           </h2>
-          <p className="mx-auto mt-4 max-w-xl text-balance text-sm opacity-75 sm:text-base">
+          <p className="mx-auto mt-4 text-balance text-sm opacity-75 sm:text-base">
             No account, no API key, no limits. Paste a link and hit Extract — everything stays free
             and private.
           </p>

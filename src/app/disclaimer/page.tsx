@@ -21,7 +21,7 @@ export default function DisclaimerPage() {
       />
 
       <PageBody>
-        <div className="prose-mono">
+        <div className="prose-mono prose-columns">
           <h2>No affiliation</h2>
           <p>
             {SITE.name} is not affiliated with, endorsed by, or sponsored by any website you choose to

@@ -21,7 +21,7 @@ export function SiteHeader() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
-      <div className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between gap-3 px-4 sm:px-6">
+      <div className="mx-auto flex h-16 w-full max-w-[1600px] items-center justify-between gap-3 px-4 sm:px-6 lg:px-8">
         <Link href="/" className="shrink-0" aria-label="Website Image Extractor home">
           <Logo />
         </Link>
@@ -69,7 +69,7 @@ export function SiteHeader() {
 
       {open ? (
         <div className="border-t border-border bg-background md:hidden">
-          <nav className="mx-auto flex w-full max-w-6xl flex-col p-3" aria-label="Mobile">
+          <nav className="mx-auto flex w-full max-w-[1600px] flex-col p-3 px-4 sm:px-6 lg:px-8" aria-label="Mobile">
             {NAV_LINKS.map((link) => (
               <Link
                 key={link.href}

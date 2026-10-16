@@ -8,8 +8,8 @@ export function SiteFooter() {
 
   return (
     <footer className="border-t border-border">
-      <div className="mx-auto w-full max-w-6xl px-4 py-12 sm:px-6">
-        <div className="grid gap-10 md:grid-cols-[1.4fr_repeat(4,1fr)]">
+      <div className="mx-auto w-full max-w-[1600px] px-4 py-12 sm:px-6 lg:px-8">
+        <div className="grid gap-8 md:grid-cols-[1.5fr_repeat(3,1fr)]">
           <div className="space-y-4">
             <Link href="/" className="inline-flex items-center gap-2.5">
               <LogoMark />

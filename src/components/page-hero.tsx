@@ -13,13 +13,13 @@ export function PageHero({ eyebrow, title, description, children, className }: P
   return (
     <section className={cn("relative overflow-hidden border-b border-border", className)}>
       <div className="grid-paper pointer-events-none absolute inset-0" aria-hidden />
-      <div className="relative mx-auto w-full max-w-6xl px-4 py-12 sm:px-6 sm:py-16">
+      <div className="relative mx-auto w-full max-w-[1600px] px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
         <p className="text-[11px] font-semibold uppercase tracking-[0.2em] opacity-60">{eyebrow}</p>
-        <h1 className="mt-4 max-w-3xl text-balance text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl">
+        <h1 className="mt-4 text-balance text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl">
           {title}
         </h1>
         {description ? (
-          <p className="mt-5 max-w-2xl text-balance text-sm opacity-75 sm:text-base">{description}</p>
+          <p className="mt-5 text-balance text-sm opacity-75 sm:text-base">{description}</p>
         ) : null}
         {children ? <div className="mt-8">{children}</div> : null}
       </div>
@@ -36,7 +36,7 @@ export function PageBody({
   className?: string;
 }) {
   return (
-    <div className={cn("mx-auto w-full max-w-3xl px-4 py-12 sm:px-6 sm:py-16", className)}>
+    <div className={cn("mx-auto w-full max-w-[1600px] px-4 py-12 sm:px-6 lg:px-8 lg:py-16", className)}>
       {children}
     </div>
   );

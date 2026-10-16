@@ -5,6 +5,7 @@
  */
 
 import assert from "node:assert/strict";
+import { readdirSync, readFileSync, statSync } from "node:fs";
 import { JSDOM } from "jsdom";
 
 import { FAQ_ENTRIES, blocksToPlainText } from "../src/lib/content/faq";
@@ -246,6 +247,73 @@ await test("tips and footer groups are complete", () => {
 await test("FAQ questions are unique", () => {
   const questions = FAQ_ENTRIES.map((entry) => entry.question);
   assert.equal(new Set(questions).size, questions.length);
+});
+
+console.log("\nLayout uniformity");
+
+/** Recursively list source files under a directory. */
+function walk(dir: string, extension = ".tsx"): string[] {
+  const found: string[] = [];
+  for (const entry of readdirSync(dir)) {
+    const path = `${dir}/${entry}`;
+    if (statSync(path).isDirectory()) found.push(...walk(path, extension));
+    else if (path.endsWith(extension)) found.push(path);
+  }
+  return found;
+}
+
+const readSource = (path: string) => readFileSync(path, "utf8");
+
+await test("no page uses a legacy narrow container width", () => {
+  const offenders: string[] = [];
+  for (const file of walk("src/app")) {
+    const source = readSource(file);
+    for (const match of source.matchAll(/max-w-(?!\[1600px\]|full)[a-z0-9[\]/.-]+/g)) {
+      offenders.push(`${file}: ${match[0]}`);
+    }
+  }
+  assert.deepEqual(offenders, [], "every page must use the single container width");
+});
+
+await test("shared chrome sits on the same container width", () => {
+  for (const file of [
+    "src/components/site-header.tsx",
+    "src/components/site-footer.tsx",
+    "src/components/page-hero.tsx",
+    "src/components/extractor/selection-bar.tsx",
+  ]) {
+    assert.match(
+      readSource(file),
+      /max-w-\[1600px\]/,
+      `${file} should use the shared container width`,
+    );
+  }
+});
+
+await test("ad slots span the full container width", () => {
+  const source = readSource("src/components/ad-slot.tsx");
+  assert.match(source, /w-full min-h-\[120px\]/);
+  assert.ok(!/max-w-\[\d+px\]/.test(source), "ad slots must not be narrower than the container");
+});
+
+await test("content cards share one surface treatment", () => {
+  const page = readSource("src/app/page.tsx");
+  // Every card in the marketing sections is an equal-height flex column.
+  const cards = page.match(/flex h-full flex-col rounded-lg border border-border bg-card/g) ?? [];
+  assert.ok(cards.length >= 4, `expected uniform cards, found ${cards.length}`);
+
+  const blog = readSource("src/app/blog/page.tsx");
+  assert.match(blog, /grid gap-4 sm:grid-cols-2 lg:grid-cols-3/);
+});
+
+await test("gallery tiles are uniform across breakpoints", () => {
+  const source = readSource("src/components/extractor/extractor.tsx");
+  const grid = source.match(/grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5/g) ?? [];
+  assert.ok(grid.length >= 1, "gallery grid should use one consistent definition");
+
+  const card = readSource("src/components/extractor/image-card.tsx");
+  assert.match(card, /aspect-square/, "tiles must share one aspect ratio");
+  assert.match(card, /overflow-hidden whitespace-nowrap/, "tile metadata must stay on one line");
 });
 
 console.log(

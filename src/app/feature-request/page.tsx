@@ -27,7 +27,7 @@ export default function FeatureRequestPage() {
         description="Tell us what would make the extractor more useful. Requests are read by the people who build the tool."
       />
 
-      <div className="mx-auto grid w-full max-w-6xl gap-10 px-4 py-12 sm:px-6 sm:py-16 lg:grid-cols-[1.2fr_1fr]">
+      <div className="mx-auto grid w-full max-w-[1600px] gap-8 px-4 py-12 sm:px-6 lg:px-8 lg:py-16 lg:grid-cols-[1.2fr_1fr]">
         <FeatureRequestForm />
 
         <aside className="space-y-8">

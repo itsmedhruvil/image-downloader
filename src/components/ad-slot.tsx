@@ -6,16 +6,20 @@ import { cn } from "@/lib/utils";
 
 type AdSize = "leaderboard" | "rectangle" | "inline";
 
+/**
+ * Every ad slot spans the full container width with the same height, so the
+ * layout stays uniform whether or not a slot is filled.
+ */
 const SIZE_CLASSES: Record<AdSize, string> = {
-  leaderboard: "mx-auto w-full max-w-[728px] aspect-[728/90]",
-  rectangle: "mx-auto w-full max-w-[336px] aspect-[336/280]",
-  inline: "mx-auto w-full max-w-[728px] min-h-[90px]",
+  leaderboard: "w-full min-h-[120px]",
+  rectangle: "w-full min-h-[120px]",
+  inline: "w-full min-h-[120px]",
 };
 
 const SIZE_LABELS: Record<AdSize, string> = {
-  leaderboard: "Ad Space · 728 × 90",
-  rectangle: "Ad Space · 336 × 280",
-  inline: "Ad Space",
+  leaderboard: "Ad Space · full width",
+  rectangle: "Ad Space · full width",
+  inline: "Ad Space · full width",
 };
 
 interface AdSlotProps {

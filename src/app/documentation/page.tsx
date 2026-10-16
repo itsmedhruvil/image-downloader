@@ -21,7 +21,7 @@ export default function DocumentationPage() {
         description="How each mode works, what the filters do, how archives are stored, and how to deploy the whole thing yourself on free tiers."
       />
 
-      <div className="mx-auto grid w-full max-w-6xl gap-10 px-4 py-12 sm:px-6 sm:py-16 lg:grid-cols-[16rem_1fr]">
+      <div className="mx-auto grid w-full max-w-[1600px] gap-8 px-4 py-12 sm:px-6 lg:px-8 lg:py-16 lg:grid-cols-[16rem_1fr]">
         <nav aria-label="Documentation sections" className="lg:sticky lg:top-24 lg:self-start">
           <p className="text-[10px] font-semibold uppercase tracking-[0.18em] opacity-60">
             On this page
@@ -56,7 +56,7 @@ export default function DocumentationPage() {
               <h2 className="text-2xl font-bold tracking-tight sm:text-3xl">{section.title}</h2>
               <p className="mt-2 text-sm opacity-70">{section.summary}</p>
               <div className="mt-6">
-                <ContentBlocks blocks={section.blocks} />
+                <ContentBlocks blocks={section.blocks} className="prose-columns" />
               </div>
             </section>
           ))}

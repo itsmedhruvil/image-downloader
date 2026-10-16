@@ -545,7 +545,7 @@ export function Extractor({ storage }: ExtractorProps) {
 
 
       {loading ? (
-        <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+        <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
           {Array.from({ length: 8 }).map((_, index) => (
             <div key={index} className="space-y-2 rounded-lg border border-border p-2">
               <Skeleton className="aspect-square w-full" />
@@ -581,7 +581,7 @@ export function Extractor({ storage }: ExtractorProps) {
             </p>
           ) : (
             <>
-              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
                 {filtered.slice(0, 400).map((image, index) => (
                   <ImageCard
                     key={image.url}

@@ -21,7 +21,7 @@ export default function PrivacyPage() {
       />
 
       <PageBody>
-        <div className="prose-mono">
+        <div className="prose-mono prose-columns">
           <h2>Summary</h2>
           <p>
             We do not store, log, sell or share the URLs you submit, the images you extract, or any

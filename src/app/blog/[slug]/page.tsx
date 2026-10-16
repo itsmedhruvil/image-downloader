@@ -69,12 +69,12 @@ export default async function BlogPostPage({ params }: PostPageProps) {
         </Button>
       </PageHero>
 
-      <article className="mx-auto w-full max-w-3xl px-4 py-12 sm:px-6 sm:py-16">
-        <ContentBlocks blocks={post.body} />
+      <article className="mx-auto w-full max-w-[1600px] px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
+        <ContentBlocks blocks={post.body} className="prose-columns" />
       </article>
 
       <section className="border-t border-border">
-        <div className="mx-auto grid w-full max-w-3xl gap-4 px-4 py-10 sm:grid-cols-2 sm:px-6">
+        <div className="mx-auto grid w-full max-w-[1600px] gap-4 px-4 py-10 sm:grid-cols-2 sm:px-6 lg:px-8">
           {previous ? (
             <Link
               href={`/blog/${previous.slug}`}
@@ -101,7 +101,7 @@ export default async function BlogPostPage({ params }: PostPageProps) {
           ) : null}
         </div>
 
-        <div className="mx-auto w-full max-w-3xl px-4 pb-14 sm:px-6">
+        <div className="mx-auto w-full max-w-[1600px] px-4 pb-14 sm:px-6 lg:px-8">
           <div className="flex flex-wrap items-center justify-between gap-4 rounded-lg border border-border p-6">
             <p className="text-sm font-semibold">Ready to pull images off a page?</p>
             <Button asChild>
